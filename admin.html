@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARPE — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#0a0a0a;
+    --near-black:#141414;
+    --panel:#151412;
+    --white:#ffffff;
+    --gray-100:rgba(255,255,255,.07);
+    --gray-300:#bdbdbb;
+    --gray-500:#8a8a88;
+    --gray-700:#b8b5ac;
+    --accent:#c81e2c;
+    --accent-dark:#8f0f1b;
+    --metal:#b7a582;
+    --metal-dim:rgba(183,165,130,.35);
+    --accent-grad:linear-gradient(135deg, #d92438 0%, #8f0f1b 100%);
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  html[data-theme="light"]{
+    --near-black:#efece4;
+    --panel:#ffffff;
+    --white:#1a1917;
+    --gray-100:rgba(0,0,0,.06);
+    --gray-500:#6b6a63;
+    --gray-700:#3e3c36;
+    --metal:#8f7c50;
+    --metal-dim:rgba(143,124,80,.35);
+  }
+  html[data-theme="light"] body,
+  html[data-theme="light"] #authGate{background:#f5f3ee;}
+  html[data-theme="light"] input,
+  html[data-theme="light"] select,
+  html[data-theme="light"] textarea{background:#ffffff;border-color:rgba(0,0,0,.15);}
+  html[data-theme="light"] input:hover,
+  html[data-theme="light"] select:hover,
+  html[data-theme="light"] textarea:hover{border-color:rgba(0,0,0,.28);}
+  html[data-theme="light"] input:read-only,
+  html[data-theme="light"] textarea:read-only{background:#f0efe9;}
+  html[data-theme="light"] input:read-only:hover,
+  html[data-theme="light"] textarea:read-only:hover{border-color:rgba(0,0,0,.15);}
+  html[data-theme="light"] .status-badge.ordered,
+  html[data-theme="light"] .status-badge.inactive{background:rgba(0,0,0,.06);}
+  html[data-theme="light"] .swatch-chip .dot{border-color:rgba(0,0,0,.2);}
+  html[data-theme="light"] .photo-grid-item,
+  html[data-theme="light"] .gallery-admin-item{background:#eeece7;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--black);color:var(--white);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  h1,h2,h3{font-family:var(--font-display);font-weight:500;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;background:#1c1b18;border:1px solid rgba(255,255,255,.16);color:var(--white);border-radius:4px;padding:9px 11px;font-size:13px;}
+  input:hover,select:hover,textarea:hover{border-color:rgba(255,255,255,.28);}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--metal-dim);}
+  input:disabled,select:disabled,textarea:disabled{opacity:.45;cursor:not-allowed;}
+  input:read-only,textarea:read-only{background:#161512;color:var(--gray-500);cursor:default;}
+  input:read-only:hover,textarea:read-only:hover{border-color:rgba(255,255,255,.16);}
+  label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray-500);display:block;margin-bottom:6px;}
+
+  /* ===== Password gate ===== */
+  #authGate{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;z-index:200;transition:opacity .3s var(--ease);}
+  #authGate.fade-out{opacity:0;}
+  #authGate.hidden{display:none;}
+  .auth-card{width:min(340px,92vw);background:var(--panel);border:1px solid var(--metal-dim);border-radius:10px;padding:clamp(22px,6vw,36px) clamp(18px,5vw,30px);text-align:center;}
+  .auth-card h1{font-size:clamp(21px,5.5vw,26px);margin-bottom:6px;}
+  .auth-card p{font-size:12px;color:var(--gray-500);margin-bottom:22px;line-height:1.5;}
+  .auth-card input{width:100%;margin-bottom:14px;text-align:center;}
+  .auth-card .btn{width:100%;}
+  .auth-error{color:var(--accent);font-size:12px;margin-bottom:12px;display:none;}
+  .auth-error.show{display:block;}
+
+  /* ===== Shared ===== */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--metal-dim);background:none;color:var(--white);padding:10px 18px;border-radius:6px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;transition:.2s var(--ease);}
+  .btn:hover{border-color:var(--metal);}
+  .btn-solid{background:var(--accent-grad);border-color:transparent;}
+  .btn-solid:hover{box-shadow:0 10px 24px -8px rgba(200,30,44,.55);}
+  .btn-ghost{border-color:var(--gray-100);color:var(--gray-500);}
+  .btn-ghost:hover{color:var(--white);border-color:var(--metal-dim);}
+  .btn-ghost.active{color:var(--white);border-color:var(--metal);background:var(--metal-dim);}
+  .btn-small{padding:6px 12px;font-size:11px;}
+  .btn[disabled]{opacity:.5;pointer-events:none;}
+
+  #app{display:none;padding:0 clamp(16px,4vw,24px) clamp(32px,6vw,56px);}
+  #app.ready{display:block;opacity:0;animation:fadeIn .4s var(--ease) forwards;}
+
+  /* ===== Topbar + sidebar shell ===== */
+  .admin-topbar{display:flex;align-items:center;justify-content:space-between;padding:clamp(12px,3vw,20px) 0;border-bottom:1px solid var(--gray-100);}
+  .admin-topbar .logo{font-family:var(--font-display);font-size:clamp(17px,4.5vw,22px);letter-spacing:.1em;}
+  .admin-topbar .logo span{color:var(--metal);}
+  .topbar-actions{display:flex;align-items:center;gap:10px;}
+  .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:6px;border:1px solid var(--gray-100);color:var(--gray-500);background:none;}
+  .icon-btn:hover{color:var(--white);border-color:var(--metal-dim);}
+  .menu-toggle{display:none;}
+
+  .admin-shell{display:flex;gap:clamp(16px,3vw,32px);align-items:flex-start;padding-top:clamp(12px,2.5vw,20px);}
+  .sidebar{width:clamp(160px,18vw,200px);flex:none;display:flex;flex-direction:column;gap:4px;position:sticky;top:28px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:6px;border:1px solid transparent;background:none;color:var(--gray-500);font-size:12px;letter-spacing:.05em;text-transform:uppercase;text-align:left;width:100%;transition:.2s var(--ease);}
+  .nav-item svg{flex:none;opacity:.85;}
+  .nav-item:hover{color:var(--white);}
+  .nav-item.active{color:var(--white);border-color:var(--metal-dim);background:var(--gray-100);}
+  .main-content{flex:1;min-width:0;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;opacity:0;animation:fadeIn .3s var(--ease) forwards;}
+  @keyframes fadeIn{to{opacity:1;}}
+
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .section-head h2{font-size:clamp(17px,3.2vw,20px);}
+  .page-sub{font-size:11px;color:var(--gray-500);margin-bottom:16px;text-transform:uppercase;letter-spacing:.06em;}
+  .status-msg{font-size:12px;color:var(--gray-500);margin-bottom:16px;}
+  .status-msg:not(:empty){animation:fadeIn .25s var(--ease);}
+  .status-msg.error{color:var(--accent);}
+
+  .filter-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+  .filter-row .search-field{margin-bottom:0;flex:1;max-width:none;min-width:min(240px,100%);}
+  .filter-row select{width:auto;min-width:min(170px,100%);flex:none;margin-left:auto;}
+
+  /* Product table */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;}
+  table{width:100%;min-width:480px;border-collapse:collapse;background:var(--panel);border:1px solid var(--gray-100);border-radius:8px;overflow:hidden;}
+  th,td{text-align:left;padding:10px 12px;font-size:13px;border-bottom:1px solid var(--gray-100);}
+  th{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-500);}
+  tr:last-child td{border-bottom:none;}
+  .flag-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;background:var(--gray-100);color:var(--gray-700);margin-right:4px;}
+  th:last-child,td.row-actions{width:120px;text-align:right;}
+  .row-actions{display:flex;gap:14px;align-items:center;justify-content:flex-end;}
+  .search-field{max-width:320px;margin-bottom:16px;}
+  .search-field input{width:100%;}
+  .table-link{background:none;border:none;color:var(--gray-500);font-size:12px;text-decoration:underline;text-underline-offset:2px;padding:0;transition:color .2s var(--ease);}
+  .table-link:hover{color:var(--white);}
+  .table-link.danger:hover{color:var(--accent);}
+
+  /* Status badges (order stages + promo active state) */
+  .status-badge{display:inline-block;font-size:10px;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;}
+  .status-badge.paid{background:rgba(183,165,130,.18);color:var(--metal);}
+  .status-badge.ordered{background:rgba(255,255,255,.08);color:var(--gray-300);}
+  .status-badge.preparing{background:rgba(230,160,40,.18);color:#e6a028;}
+  .status-badge.shipped{background:rgba(60,140,220,.18);color:#5aa9e6;}
+  .status-badge.delivered{background:rgba(70,180,110,.18);color:#4fc37f;}
+  .status-badge.active{background:rgba(70,180,110,.18);color:#4fc37f;}
+  .status-badge.inactive{background:rgba(255,255,255,.08);color:var(--gray-300);}
+
+  /* Order line items (itemized form) */
+  .order-item-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+  .order-item-row{display:flex;align-items:center;gap:10px;background:var(--near-black);border:1px solid var(--gray-100);border-radius:6px;padding:8px 12px;font-size:12px;}
+  .order-item-row .oi-name{flex:1;}
+  .order-item-row .oi-qty{color:var(--gray-500);}
+  .order-item-row .oi-subtotal{color:var(--gray-700);min-width:80px;text-align:right;}
+  .order-item-row button{background:none;border:none;color:var(--gray-500);font-size:14px;padding:0;}
+  .order-item-row button:hover{color:var(--accent);}
+  .order-item-add{display:flex;align-items:center;gap:8px;}
+  .order-item-add select{flex:1;}
+  .order-item-add input[type=number]{width:70px;}
+  .order-total-row{display:flex;justify-content:space-between;font-size:14px;font-weight:600;padding:10px 0;border-top:1px solid var(--gray-100);margin-top:6px;color:var(--white);}
+
+  /* Order stage stepper (itemized form) */
+  .stage-stepper{display:flex;align-items:flex-start;margin:8px 0 4px;}
+  .stage-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;cursor:pointer;}
+  .stage-step .dot{width:16px;height:16px;border-radius:50%;background:var(--near-black);border:2px solid var(--gray-100);transition:.2s var(--ease);z-index:1;}
+  .stage-step .stage-label{font-size:clamp(9px,2.2vw,10px);letter-spacing:.05em;text-transform:uppercase;color:var(--gray-500);}
+  .stage-step::before{content:'';position:absolute;top:7px;left:-50%;width:100%;height:2px;background:var(--gray-100);z-index:0;}
+  .stage-step:first-child::before{display:none;}
+  .stage-step.done .dot{background:var(--metal);border-color:var(--metal);}
+  .stage-step.done::before{background:var(--metal);}
+  .stage-step.active .dot{background:var(--accent-grad);border-color:transparent;box-shadow:0 0 0 4px rgba(200,30,44,.2);}
+  .stage-step.active .stage-label{color:var(--white);}
+
+  /* Orders kanban board */
+  .order-board{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;}
+  .order-column{flex:1 1 0;min-width:190px;display:flex;flex-direction:column;gap:10px;}
+  .order-column-head{display:flex;align-items:center;justify-content:space-between;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray-500);padding:0 2px 8px;border-bottom:1px solid var(--gray-100);margin-bottom:2px;}
+  .order-column-head .count{color:var(--white);background:var(--gray-100);border-radius:20px;padding:1px 8px;font-size:10px;}
+  .stage-pill{display:inline-block;border-radius:20px;padding:3px 10px;font-weight:700;color:var(--black);}
+  .order-card{background:var(--panel);border:1px solid var(--gray-100);border-radius:8px;padding:12px;cursor:pointer;transition:.2s var(--ease);}
+  .order-card:hover{border-color:var(--metal-dim);}
+  .order-card .oc-top{display:flex;justify-content:space-between;font-size:10px;color:var(--gray-500);margin-bottom:6px;}
+  .order-card .oc-customer{font-size:13px;font-weight:600;margin-bottom:2px;}
+  .order-card .oc-meta{font-size:11px;color:var(--gray-500);margin-bottom:8px;}
+  .order-card .oc-total{font-size:14px;font-weight:600;margin-bottom:10px;}
+  .order-card .oc-mark{width:100%;}
+  .order-card .oc-foot{display:flex;justify-content:space-between;margin-top:10px;}
+
+  /* Reviews */
+  .review-admin-card{display:flex;gap:14px;background:var(--panel);border:1px solid var(--gray-100);border-radius:8px;padding:14px;margin-bottom:12px;align-items:flex-start;}
+  .review-admin-card.is-pending{border-color:#c9a227;}
+  .review-admin-card .rac-img{width:64px;height:64px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--gray-100);}
+  .review-admin-card .rac-img.ph{display:flex;align-items:center;justify-content:center;color:var(--gray-500);font-size:10px;text-align:center;}
+  .review-admin-card .rac-body{flex:1;min-width:0;}
+  .review-admin-card .rac-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
+  .review-admin-card .rac-name{font-size:13px;font-weight:600;}
+  .review-admin-card .rac-product{font-size:11px;color:var(--gray-500);}
+  .review-admin-card .rac-stars{color:#c9a227;font-size:13px;margin-bottom:6px;}
+  .review-admin-card .rac-comment{font-size:12px;color:var(--gray-500);margin-bottom:10px;line-height:1.5;}
+  .review-admin-card .rac-badge{font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:20px;background:var(--gray-100);white-space:nowrap;}
+  .review-admin-card .rac-badge.approved{background:#1f7a3f;color:#fff;}
+  .review-admin-card .rac-badge.pending{background:#c9a227;color:#000;}
+  .review-admin-card .rac-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+  /* Segmented toggle (promo discount type) */
+  .segmented{display:flex;border:1px solid var(--gray-100);border-radius:6px;overflow:hidden;width:fit-content;}
+  .segmented button{border:none;background:none;color:var(--gray-500);padding:9px 18px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;}
+  .segmented button.active{background:var(--gray-100);color:var(--white);}
+
+  /* Form */
+  .form-card{background:var(--panel);border:1px solid var(--metal-dim);border-radius:10px;padding:clamp(14px,3vw,22px);margin-bottom:20px;}
+  .shipping-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-bottom:20px;}
+  .shipping-grid .form-card{margin-bottom:0;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+  .form-field{display:flex;flex-direction:column;}
+  .form-field.full{grid-column:1/-1;}
+  .form-field input,.form-field select,.form-field textarea{width:100%;}
+  .check-row{display:flex;flex-wrap:wrap;gap:10px;}
+  .check-row label{display:flex;align-items:center;gap:6px;font-size:12px;text-transform:none;letter-spacing:0;color:var(--white);margin:0;}
+  .check-row input{width:auto;padding:0;}
+
+  .swatch-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .swatch-chip{display:flex;align-items:center;gap:6px;background:var(--near-black);border:1px solid var(--gray-100);border-radius:20px;padding:4px 4px 4px 4px;}
+  .swatch-chip .dot{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.2);}
+  .swatch-chip button{background:none;border:none;color:var(--gray-500);font-size:14px;padding:0 8px;}
+  .swatch-chip button:hover{color:var(--accent);}
+  .swatch-add{display:flex;align-items:center;gap:8px;}
+  .swatch-add input[type=color]{width:40px;height:34px;padding:2px;}
+
+  .field-hint{font-size:11px;color:var(--gray-500);margin-top:8px;}
+  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-bottom:4px;}
+  .photo-grid-item{position:relative;aspect-ratio:3/4;border-radius:4px;overflow:hidden;background:#111;border:1px solid var(--gray-100);cursor:pointer;}
+  .photo-grid-item img{width:100%;height:100%;object-fit:cover;display:block;}
+  .photo-grid-item.cover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+  .photo-grid-item .cover-badge{position:absolute;left:0;top:0;background:var(--accent);color:#fff;font-size:9px;padding:2px 6px;letter-spacing:.05em;text-transform:uppercase;}
+  .photo-grid-item .del{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.65);border:none;color:#fff;font-size:13px;line-height:1;}
+  .photo-grid-item .del:hover{background:var(--accent);}
+  .form-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+  /* Gallery */
+  .gallery-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:26px;}
+  .gallery-admin-item{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:#111;border:1px solid var(--gray-100);}
+  .gallery-admin-item img{width:100%;height:100%;object-fit:cover;}
+  .gallery-admin-item .cap{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);font-size:10px;padding:4px 6px;color:var(--gray-300);}
+  .gallery-admin-item .del{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.65);border:none;color:#fff;font-size:14px;line-height:1;}
+  .gallery-admin-item .del:hover{background:var(--accent);}
+
+  /* ===== Responsive overrides (kept last so they win the cascade) ===== */
+  @media (max-width:900px){
+    /* Ease the squeeze between the sidebar breakpoint and the mobile stack —
+       gives the table room to shrink before it needs to flip to cards. */
+    .admin-shell{gap:18px;}
+    .sidebar{width:150px;}
+    table{min-width:0;}
+  }
+
+  @media (max-width:768px){
+    .admin-shell{flex-direction:column;align-items:stretch;gap:0;padding-top:0;}
+    .main-content{width:100%;}
+    .menu-toggle{display:inline-flex;}
+    .sidebar{width:100%;flex-direction:column;overflow:hidden;position:static;gap:4px;padding:0;border-bottom:1px solid transparent;margin-bottom:0;max-height:0;opacity:0;transition:max-height .35s var(--ease),opacity .3s var(--ease),margin-bottom .35s var(--ease),padding .35s var(--ease);}
+    .sidebar.open{max-height:600px;opacity:1;margin-bottom:18px;padding:14px 0;border-bottom-color:var(--gray-100);}
+    .nav-item{flex:none;white-space:normal;}
+    .section-head{flex-wrap:wrap;gap:10px;}
+    .form-grid{grid-template-columns:1fr;}
+    .shipping-grid{grid-template-columns:1fr;}
+    .filter-row{flex-direction:column;align-items:stretch;}
+    .filter-row .search-field{min-width:0;}
+    .filter-row select{margin-left:0;width:100%;min-width:0;}
+    .order-item-add{flex-wrap:wrap;}
+    .order-item-add select{width:100%;}
+    .form-actions{flex-wrap:wrap;}
+
+    /* No sideways scrolling on phones — stack the kanban columns instead of scrolling them */
+    .order-board{flex-direction:column;overflow-x:visible;}
+    .order-column{flex:none;width:100%;}
+
+    /* No sideways scrolling on tables — turn rows into stacked cards, phone-view style */
+    .table-scroll{overflow-x:visible;}
+    table{min-width:0;width:100%;border:none;background:none;border-spacing:0;}
+    thead{display:none;}
+    tbody{display:flex;flex-direction:column;gap:10px;}
+    tr{display:block;background:var(--panel);border:1px solid var(--gray-100);border-radius:8px;padding:clamp(11px,3.5vw,14px);}
+    td{display:block;border:none;padding:2px 0 !important;font-size:clamp(12px,3.4vw,13px);width:auto !important;text-align:left !important;word-break:break-word;}
+    tr td:first-child{font-size:clamp(13px,3.8vw,14px);font-weight:600;color:var(--white);}
+    tr td:nth-child(2){color:var(--gray-500);font-size:clamp(10px,3vw,11px);text-transform:uppercase;letter-spacing:.05em;}
+    tr td:nth-child(3){font-size:clamp(14px,4vw,15px);font-weight:600;color:var(--metal);margin-top:4px;}
+    td.row-actions{display:flex !important;justify-content:flex-end;gap:16px;margin-top:10px;padding-top:10px !important;border-top:1px solid var(--gray-100) !important;}
+
+    /* Products cards: pack name+flags and price+actions onto shared rows instead of
+       stacking every field on its own line — maximizes the card's width, not just its height. */
+    #tab-products tr{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto auto;column-gap:10px;row-gap:3px;padding:clamp(11px,3.5vw,14px);}
+    #tab-products td{padding:0 !important;width:100% !important;}
+    #tab-products td:nth-child(1){grid-column:1;grid-row:1;align-self:start;}
+    #tab-products td:nth-child(4){grid-column:2;grid-row:1;justify-self:end;text-align:right;}
+    #tab-products td:nth-child(4):empty{display:none;}
+    #tab-products td:nth-child(2){grid-column:1/-1;grid-row:2;}
+    #tab-products tr::before{content:'';grid-column:1/-1;grid-row:3;height:1px;background:var(--gray-100);margin:6px 0 2px;}
+    #tab-products td:nth-child(3){grid-column:1;grid-row:4;align-self:end;}
+    #tab-products td.row-actions{grid-column:2;grid-row:4;justify-self:end;margin-top:0 !important;padding-top:0 !important;border-top:none !important;}
+  }
+
+</style>
+</head>
+<body>
+<script>
+  document.documentElement.dataset.theme = localStorage.getItem('carpeAdminTheme') === 'light' ? 'light' : 'dark';
+</script>
+
+<div id="authGate">
+  <div class="auth-card">
+    <h1>CARPE <span style="color:var(--metal)">Admin</span></h1>
+    <p>Enter the admin password to manage products and the customer gallery.<br>This is a basic screen lock only — not a secure login.</p>
+    <div class="auth-error" id="authError">Incorrect password.</div>
+    <input type="password" id="authPassword" placeholder="Password" autocomplete="off">
+    <button class="btn btn-solid" id="authSubmit">Enter</button>
+  </div>
+</div>
+
+<div id="app">
+  <header class="admin-topbar">
+    <div class="logo">CARPE <span>Admin</span></div>
+    <div class="topbar-actions">
+      <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <a class="icon-btn" href="index.html" target="_blank" rel="noopener" title="View Storefront">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10h16V9"/><path d="M9 19v-6h6v6"/></svg>
+      </a>
+      <button class="icon-btn" id="themeToggle" title="Toggle light / dark theme">
+        <svg id="themeIconMoon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        <svg id="themeIconSun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" style="display:none;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button class="btn btn-ghost btn-small" id="logoutBtn">Log out</button>
+    </div>
+  </header>
+
+  <div class="admin-shell">
+    <nav class="sidebar" id="sidebar">
+      <button class="nav-item active" data-tab="products">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>
+        Products
+      </button>
+      <button class="nav-item" data-tab="gallery">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg>
+        Customer Gallery
+      </button>
+      <button class="nav-item" data-tab="orders">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></svg>
+        Orders
+      </button>
+      <button class="nav-item" data-tab="promos">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 12l-8 8-9-9V3h8l9 9z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+        Promos
+      </button>
+      <button class="nav-item" data-tab="categories">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h7l9 9-7 7-9-9V4z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>
+        Categories
+      </button>
+      <button class="nav-item" data-tab="shipping">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="7" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="2"/><circle cx="17.5" cy="19" r="2"/></svg>
+        Shipping
+      </button>
+      <button class="nav-item" data-tab="reviews">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z"/></svg>
+        Reviews
+      </button>
+      <button class="nav-item" data-tab="account">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5.07 1 .2 1.6l-2 1.5 2 3.4 2.3-.9c.8.7 1.8 1.3 2.8 1.6l.4 2.8h2.6l.4-2.8a7 7 0 002.8-1.6l2.3.9 2-3.4-2-1.5c.13-.6.2-1.1.2-1.6z"/></svg>
+        Account
+      </button>
+    </nav>
+
+    <div class="main-content">
+
+      <!-- ===== Products tab ===== -->
+      <div class="tab-panel active" id="tab-products">
+        <div class="status-msg" id="productStatus"></div>
+
+        <div class="form-card" id="productFormCard" style="display:none;">
+          <button type="button" class="btn btn-ghost" id="pfBack" style="margin-bottom:18px;">&larr; Back to Catalog</button>
+          <h3 id="productFormTitle" style="margin-bottom:18px;">Add Product</h3>
+          <input type="hidden" id="pfId">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Name</label>
+              <input type="text" id="pfName" placeholder="e.g. Nocturne Hoodie — Jet Black">
+            </div>
+            <div class="form-field">
+              <label>Price (₱)</label>
+              <input type="number" id="pfPrice" min="0" step="1" placeholder="2995">
+            </div>
+            <div class="form-field">
+              <label>Category</label>
+              <select id="pfCategory"></select>
+            </div>
+            <div class="form-field full">
+              <label>Photos</label>
+              <div class="photo-grid" id="pfPhotoGrid"></div>
+              <input type="file" id="pfPhoto" accept="image/*" multiple>
+              <p class="field-hint">First photo is the cover shown on product cards. Click a photo to make it the cover.</p>
+            </div>
+            <div class="form-field full">
+              <label>Description</label>
+              <textarea id="pfDesc" rows="2" placeholder="Short product description shown in quick view"></textarea>
+            </div>
+            <div class="form-field full">
+              <label>Sizes</label>
+              <div class="check-row" id="pfSizes"></div>
+            </div>
+            <div class="form-field full">
+              <label>Swatch Colors</label>
+              <div class="swatch-list" id="pfSwatchList"></div>
+              <div class="swatch-add">
+                <input type="color" id="pfSwatchColor" value="#111111">
+                <button type="button" class="btn btn-small" id="pfSwatchAdd">Add Color</button>
+              </div>
+            </div>
+            <div class="form-field full">
+              <label>Feature Flags</label>
+              <div class="check-row">
+                <label><input type="checkbox" id="pfBestSeller"> Most Wanted (Best Seller)</label>
+                <label><input type="checkbox" id="pfNewArrival"> New Arrivals</label>
+                <label><input type="checkbox" id="pfTrending"> Trending Fits</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-ghost" id="pfCancel">Cancel</button>
+            <button class="btn btn-solid" id="pfSave">Save Product</button>
+          </div>
+        </div>
+
+        <div id="productCatalogView">
+          <div class="section-head">
+            <h2>Catalog</h2>
+            <button class="btn btn-solid" id="addProductBtn">+ Add Product</button>
+          </div>
+          <div class="filter-row">
+            <div class="search-field">
+              <input type="text" id="productSearch" placeholder="Search by name or category...">
+            </div>
+            <select id="productCategoryFilter"></select>
+          </div>
+          <p class="page-sub" id="productCount"></p>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Flags</th><th></th></tr></thead>
+              <tbody id="productTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Gallery tab ===== -->
+      <div class="tab-panel" id="tab-gallery">
+        <div class="status-msg" id="galleryStatus"></div>
+        <div class="form-card">
+          <h3 style="margin-bottom:18px;">Add Gallery Photo</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Photo</label>
+              <input type="file" id="gfPhoto" accept="image/*">
+            </div>
+            <div class="form-field">
+              <label>Caption (optional)</label>
+              <input type="text" id="gfCaption" placeholder="e.g. @username in the Nocturne Hoodie">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-solid" id="gfUpload">Upload to Gallery</button>
+          </div>
+        </div>
+        <div class="section-head"><h2>Gallery Photos</h2></div>
+        <div class="gallery-admin-grid" id="galleryAdminGrid"></div>
+      </div>
+
+      <!-- ===== Orders tab ===== -->
+      <div class="tab-panel" id="tab-orders">
+        <div class="status-msg" id="orderStatus"></div>
+
+        <div class="form-card" id="orderFormCard" style="display:none;">
+          <button type="button" class="btn btn-ghost" id="ofBack" style="margin-bottom:18px;">&larr; Back to Orders</button>
+          <div class="detail-head" style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;">
+            <div>
+              <h3 id="orderFormTitle" style="margin-bottom:4px;">Order Details</h3>
+              <p class="page-sub" id="ofCreatedAt"></p>
+            </div>
+            <span class="status-badge" id="ofStatusBadge"></span>
+          </div>
+          <input type="hidden" id="ofId">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Customer Name</label>
+              <input type="text" id="ofCustomerName" readonly>
+            </div>
+            <div class="form-field">
+              <label>Email</label>
+              <input type="email" id="ofCustomerEmail" readonly>
+            </div>
+            <div class="form-field">
+              <label>Phone</label>
+              <input type="text" id="ofCustomerPhone" readonly>
+            </div>
+            <div class="form-field">
+              <label>Tracking Number</label>
+              <input type="text" id="ofTracking" placeholder="Available once order reaches Preparing">
+              <p class="page-sub" id="ofTrackingHint" style="margin:6px 0 0;"></p>
+            </div>
+            <div class="form-field full">
+              <label>Items</label>
+              <div class="order-item-list" id="ofItemList"></div>
+              <div class="order-total-row" style="display:flex;justify-content:space-between;margin-top:10px;font-weight:600;">
+                <span>Total</span>
+                <span id="ofTotalDisplay"></span>
+              </div>
+            </div>
+            <div class="form-field full">
+              <label>Shipping / Notes</label>
+              <textarea id="ofNotes" rows="3" readonly></textarea>
+            </div>
+            <div class="form-field full">
+              <label>Status</label>
+              <div class="stage-stepper" id="ofStageStepper"></div>
+            </div>
+          </div>
+          <div class="form-actions" style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="danger-actions" style="display:flex;gap:8px;">
+              <button class="btn btn-ghost btn-small" id="ofCancelOrderBtn">Cancel Order</button>
+              <button class="btn btn-ghost btn-small" id="ofRefundOrderBtn">Refund</button>
+              <button class="btn btn-ghost btn-small" id="ofDeleteOrderBtn">Delete Order</button>
+            </div>
+            <div class="save-actions" style="display:flex;gap:10px;">
+              <button class="btn btn-ghost" id="ofCancel">Cancel</button>
+              <button class="btn btn-solid" id="ofSave">Save Changes</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="orderBoardView">
+          <div class="section-head">
+            <h2>Orders</h2>
+          </div>
+          <div class="filter-row">
+            <div class="search-field">
+              <input type="text" id="orderSearch" placeholder="Search by order #, name, or email...">
+            </div>
+            <button type="button" class="btn btn-ghost btn-small" id="filterCancelledBtn" data-status-filter="cancelled">Cancelled (<span id="cancelledCount">0</span>)</button>
+            <button type="button" class="btn btn-ghost btn-small" id="filterRefundedBtn" data-status-filter="refunded">Refunded (<span id="refundedCount">0</span>)</button>
+          </div>
+          <p class="page-sub" id="orderCount"></p>
+          <div class="order-board" id="orderBoard"></div>
+        </div>
+      </div>
+
+      <!-- ===== Promos tab ===== -->
+      <div class="tab-panel" id="tab-promos">
+        <div class="status-msg" id="promoStatus"></div>
+
+        <div class="form-card" id="promoFormCard" style="display:none;">
+          <button type="button" class="btn btn-ghost" id="pmBack" style="margin-bottom:18px;">&larr; Back to Promo Codes</button>
+          <h3 id="promoFormTitle" style="margin-bottom:18px;">New Promo Code</h3>
+          <input type="hidden" id="pmId">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Code</label>
+              <input type="text" id="pmCode" placeholder="e.g. WELCOME10" style="text-transform:uppercase;">
+            </div>
+            <div class="form-field">
+              <label>Discount Type</label>
+              <div class="segmented" id="pmTypeToggle">
+                <button type="button" class="active" data-type="percent">% off</button>
+                <button type="button" data-type="amount">₱ off</button>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Discount Value</label>
+              <input type="number" id="pmValue" min="0" step="1" placeholder="10">
+            </div>
+            <div class="form-field">
+              <label>Min Subtotal (₱, optional)</label>
+              <input type="number" id="pmMinSubtotal" min="0" step="1" placeholder="None">
+            </div>
+            <div class="form-field">
+              <label>Max Uses (optional)</label>
+              <input type="number" id="pmMaxUses" min="1" step="1" placeholder="Unlimited">
+            </div>
+            <div class="form-field">
+              <label>Expires (optional)</label>
+              <input type="datetime-local" id="pmExpires">
+            </div>
+            <div class="form-field full">
+              <div class="check-row">
+                <label><input type="checkbox" id="pmOnePerEmail"> One use per email</label>
+                <label><input type="checkbox" id="pmActive" checked> Active — buyers can use this code</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-ghost" id="pmCancel">Cancel</button>
+            <button class="btn btn-solid" id="pmSave">Save Code</button>
+          </div>
+        </div>
+
+        <div id="promoCatalogView">
+          <div class="section-head">
+            <h2>Promo Codes</h2>
+            <button class="btn btn-solid" id="addPromoBtn">+ New Code</button>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Code</th><th>Discount</th><th>Rules</th><th>Uses</th><th>Status</th><th></th></tr></thead>
+              <tbody id="promoTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Categories tab ===== -->
+      <div class="tab-panel" id="tab-categories">
+        <div class="status-msg" id="categoryStatus"></div>
+        <div class="form-card">
+          <h3 style="margin-bottom:18px;">Add Category</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Category Name</label>
+              <input type="text" id="catName" placeholder="e.g. Bags">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-solid" id="catAdd">Add Category</button>
+          </div>
+        </div>
+        <div class="section-head"><h2>Custom Categories</h2></div>
+        <p class="page-sub">The 5 built-in categories (Hoodies, Jackets, Pants, Shirts, Accessories) aren't listed here — only ones you add show up in this table.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Label</th><th>Slug</th><th>Products</th><th></th></tr></thead>
+            <tbody id="categoryTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== Shipping tab ===== -->
+      <div class="tab-panel" id="tab-shipping">
+        <div class="section-head"><h2>Shipping &amp; Pickup</h2></div>
+        <p class="page-sub">Controls the delivery options shown at checkout.</p>
+        <div class="status-msg" id="shippingStatus"></div>
+
+        <div class="shipping-grid">
+          <div class="form-card">
+            <h3 style="margin-bottom:18px;">Standard Shipping</h3>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Flat Rate (₱)</label>
+                <input type="number" id="shFlatRate" min="0" step="1">
+              </div>
+              <div class="form-field">
+                <label>Free Shipping Threshold (₱)</label>
+                <input type="number" id="shFreeThreshold" min="0" step="1">
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">Orders at or above the threshold ship free. Set the threshold to 0 to disable free shipping.</p>
+          </div>
+
+          <div class="form-card">
+            <h3 style="margin-bottom:18px;">Store Pickup</h3>
+            <div class="form-field full" style="margin-bottom:14px;">
+              <div class="check-row">
+                <label><input type="checkbox" id="shPickupEnabled"> Offer Store Pickup (No Fee) at checkout</label>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field full">
+                <label>Store Name</label>
+                <input type="text" id="shPickupName" placeholder="e.g. CARPE Flagship Store">
+              </div>
+              <div class="form-field full">
+                <label>Address</label>
+                <input type="text" id="shPickupAddress" placeholder="e.g. 123 Poblacion Ave, Makati City, Metro Manila">
+              </div>
+              <div class="form-field full">
+                <label>Hours</label>
+                <input type="text" id="shPickupHours" placeholder="e.g. Mon–Sat, 11AM–8PM">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-solid" id="shSave">Save Shipping Settings</button>
+        </div>
+      </div>
+
+      <!-- ===== Reviews tab ===== -->
+      <div class="tab-panel" id="tab-reviews">
+        <div class="section-head"><h2>Reviews</h2></div>
+        <p class="page-sub">Customer reviews submitted from completed (delivered) orders. Approve a review to show it in the storefront Testimonials section.</p>
+        <div class="status-msg" id="reviewStatus"></div>
+        <div class="review-admin-filters check-row" style="margin-bottom:16px;">
+          <label><input type="checkbox" id="reviewShowApprovedToo"> Also show already-approved reviews</label>
+        </div>
+        <div id="reviewAdminList"></div>
+      </div>
+
+      <!-- ===== Account tab ===== -->
+      <div class="tab-panel" id="tab-account">
+        <div class="section-head"><h2>Account</h2></div>
+        <p class="page-sub">CARPE Admin Access</p>
+
+        <div class="form-card" style="max-width:420px;">
+          <h3 style="margin-bottom:18px;">Change Password</h3>
+          <div class="status-msg" id="accountStatus"></div>
+          <div class="form-field" style="margin-bottom:14px;">
+            <label>Current Password</label>
+            <input type="password" id="acCurrentPassword" autocomplete="off">
+          </div>
+          <div class="form-field" style="margin-bottom:14px;">
+            <label>New Password</label>
+            <input type="password" id="acNewPassword" autocomplete="off">
+          </div>
+          <div class="form-field" style="margin-bottom:18px;">
+            <label>Confirm New Password</label>
+            <input type="password" id="acConfirmPassword" autocomplete="off">
+          </div>
+          <button class="btn btn-solid" id="acChangePassword">Change Password</button>
+          <p style="font-size:11px;color:var(--gray-500);margin-top:14px;line-height:1.5;">This is a basic screen lock only, stored in this browser — not a real account system. Changing it here won't affect other browsers/devices.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="data/constants.js"></script>
+<script src="data/supabase-client.js"></script>
+<script src="data/render.js"></script>
+<script>
+  // ===== Auth gate (client-side convenience lock only — see plan's security note) =====
+  const ADMIN_PASSWORD = 'carpe-admin-2026';
+  const AUTH_KEY = 'carpeAdminAuth';
+  const authGate = document.getElementById('authGate');
+  const app = document.getElementById('app');
+
+  // Password override lives in Supabase (admin_settings table), not localStorage —
+  // localStorage is tied to the exact file path, so it broke whenever admin.html was
+  // moved/copied to a different folder.
+  let adminSettingsPromise = null;
+  async function loadAdminSettings() {
+    let settings = await CarpeDB.fetchAdminSettings().catch((err) => {
+      console.error('Failed to load admin settings, falling back to default password', err);
+      return null;
+    });
+    const legacyOverride = localStorage.getItem('carpeAdminPasswordOverride');
+    if (legacyOverride && (!settings || !settings.password_override)) {
+      try {
+        settings = await CarpeDB.updateAdminSettings({ password_override: legacyOverride });
+      } catch (err) {
+        console.error('Failed to migrate legacy local password override', err);
+      }
+      localStorage.removeItem('carpeAdminPasswordOverride');
+    }
+    return settings;
+  }
+  function getAdminSettings() {
+    if (!adminSettingsPromise) adminSettingsPromise = loadAdminSettings();
+    return adminSettingsPromise;
+  }
+  getAdminSettings();
+
+  async function getAdminPassword() {
+    const settings = await getAdminSettings();
+    return (settings && settings.password_override) || ADMIN_PASSWORD;
+  }
+
+  function unlock() {
+    authGate.classList.add('fade-out');
+    setTimeout(() => authGate.classList.add('hidden'), 300);
+    app.classList.add('ready');
+    initAdmin();
+  }
+  document.getElementById('authSubmit').addEventListener('click', tryAuth);
+  document.getElementById('authPassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryAuth(); });
+  async function tryAuth() {
+    const val = document.getElementById('authPassword').value;
+    const expected = await getAdminPassword();
+    if (val === expected) {
+      sessionStorage.setItem(AUTH_KEY, '1');
+      unlock();
+    } else {
+      document.getElementById('authError').classList.add('show');
+    }
+  }
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem(AUTH_KEY);
+    window.location.reload();
+  });
+
+  // ===== Theme toggle (light / dark) =====
+  function applyThemeIcon() {
+    const isLight = document.documentElement.dataset.theme === 'light';
+    document.getElementById('themeIconMoon').style.display = isLight ? 'none' : '';
+    document.getElementById('themeIconSun').style.display = isLight ? '' : 'none';
+  }
+  applyThemeIcon();
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('carpeAdminTheme', next);
+    applyThemeIcon();
+  });
+
+  // ===== Sidebar nav =====
+  const sidebarEl = document.getElementById('sidebar');
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    sidebarEl.classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      sidebarEl.classList.remove('open');
+    });
+  });
+
+  // ===== State =====
+  let products = [];
+  let galleryItems = [];
+  let orders = [];
+  let currentOrderItems = [];
+  let currentOrderStatus = 'paid';
+  let promos = [];
+  let promoDiscountType = 'percent';
+  let currentImages = [];
+  let orderStatusFilter = null;
+  let categories = [];
+  let reviews = [];
+
+  if (sessionStorage.getItem(AUTH_KEY) === '1') {
+    unlock();
+  }
+
+  async function initAdmin() {
+    await syncCategoriesFromDB();
+    populateCategorySelect();
+    populateCategoryFilter();
+    populateSizeCheckboxes();
+    renderOrderBoard();
+    await Promise.all([loadProducts(), loadGallery(), loadOrders(), loadPromos(), loadCategories(), loadShippingSettings(), loadReviews()]);
+  }
+
+  function populateCategorySelect() {
+    const sel = document.getElementById('pfCategory');
+    sel.innerHTML = CARPE_CATEGORIES.map(c => `<option value="${c.slug}">${c.label}</option>`).join('');
+  }
+  function populateCategoryFilter() {
+    const sel = document.getElementById('productCategoryFilter');
+    sel.innerHTML = '<option value="">All categories</option>' +
+      CARPE_CATEGORIES.map(c => `<option value="${c.slug}">${c.label}</option>`).join('');
+  }
+  function populateSizeCheckboxes() {
+    const wrap = document.getElementById('pfSizes');
+    wrap.innerHTML = CARPE_SIZE_OPTIONS.map(sz =>
+      `<label><input type="checkbox" value="${sz}" class="pf-size-cb"> ${sz}</label>`
+    ).join('');
+  }
+
+  function setStatus(id, msg, isError) {
+    const el = document.getElementById(id);
+    el.textContent = msg || '';
+    el.classList.toggle('error', !!isError);
+  }
+
+  // ===== Products: load + render table =====
+  async function loadProducts() {
+    setStatus('productStatus', 'Loading products…');
+    try {
+      products = await CarpeDB.fetchProducts();
+      setStatus('productStatus', '');
+      renderProductTable();
+      renderCategoryTable();
+    } catch (err) {
+      setStatus('productStatus', 'Failed to load products: ' + err.message, true);
+    }
+  }
+
+  document.getElementById('productSearch').addEventListener('input', renderProductTable);
+  document.getElementById('productCategoryFilter').addEventListener('change', renderProductTable);
+
+  function renderProductTable() {
+    const term = document.getElementById('productSearch').value.trim().toLowerCase();
+    const categoryFilter = document.getElementById('productCategoryFilter').value;
+    const filtered = products.filter(p => {
+      const matchesTerm = !term || (p.name || '').toLowerCase().includes(term) || categoryLabel(p.category).toLowerCase().includes(term);
+      const matchesCategory = !categoryFilter || p.category === categoryFilter;
+      return matchesTerm && matchesCategory;
+    });
+
+    document.getElementById('productCount').textContent = `${filtered.length} item${filtered.length === 1 ? '' : 's'}`;
+
+    const body = document.getElementById('productTableBody');
+    body.innerHTML = '';
+    filtered.forEach(p => {
+      const tr = document.createElement('tr');
+      const flags = [
+        p.best_seller ? '<span class="flag-tag">Most Wanted</span>' : '',
+        p.new_arrival ? '<span class="flag-tag">New</span>' : '',
+        p.trending ? '<span class="flag-tag">Trending</span>' : ''
+      ].join('');
+      tr.innerHTML = `
+        <td>${escapeHtml(p.name)}</td>
+        <td>${escapeHtml(categoryLabel(p.category))}</td>
+        <td>${formatPeso(p.price)}</td>
+        <td>${flags}</td>
+        <td class="row-actions">
+          <button class="table-link" data-edit="${p.id}">Edit</button>
+          <button class="table-link danger" data-delete="${p.id}">Delete</button>
+        </td>`;
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('[data-edit]').forEach(btn =>
+      btn.addEventListener('click', () => openProductForm(btn.dataset.edit)));
+    body.querySelectorAll('[data-delete]').forEach(btn =>
+      btn.addEventListener('click', () => deleteProductRow(btn.dataset.delete)));
+  }
+
+  // ===== Product form =====
+  const productFormCard = document.getElementById('productFormCard');
+  let currentSwatches = [];
+
+  const productCatalogView = document.getElementById('productCatalogView');
+
+  document.getElementById('addProductBtn').addEventListener('click', () => openProductForm(null));
+  document.getElementById('pfCancel').addEventListener('click', closeProductForm);
+  document.getElementById('pfBack').addEventListener('click', closeProductForm);
+
+  function openProductForm(id) {
+    const product = id ? products.find(p => p.id === id) : null;
+    document.getElementById('productFormTitle').textContent = product ? 'Edit Product' : 'Add Product';
+    document.getElementById('pfId').value = product ? product.id : '';
+    document.getElementById('pfName').value = product ? product.name : '';
+    document.getElementById('pfPrice').value = product ? product.price : '';
+    document.getElementById('pfCategory').value = product ? product.category : CARPE_CATEGORIES[0].slug;
+    document.getElementById('pfDesc').value = product ? (product.description || '') : '';
+
+    document.querySelectorAll('.pf-size-cb').forEach(cb => {
+      cb.checked = product ? (product.sizes || []).includes(cb.value) : false;
+    });
+
+    currentSwatches = product ? [...(product.swatch_colors || [])] : [];
+    renderSwatchChips();
+
+    document.getElementById('pfBestSeller').checked = product ? !!product.best_seller : false;
+    document.getElementById('pfNewArrival').checked = product ? !!product.new_arrival : false;
+    document.getElementById('pfTrending').checked = product ? !!product.trending : false;
+
+    document.getElementById('pfPhoto').value = '';
+    const existingUrls = product ? (product.image_urls && product.image_urls.length ? product.image_urls : [product.image_url].filter(Boolean)) : [];
+    const existingPaths = product ? (product.image_paths && product.image_paths.length ? product.image_paths : [product.image_path].filter(Boolean)) : [];
+    currentImages = existingUrls.map((url, i) => ({ url, path: existingPaths[i] || null, isNew: false }));
+    renderPhotoGrid();
+
+    productCatalogView.style.display = 'none';
+    productFormCard.style.display = 'block';
+    document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function closeProductForm() {
+    productFormCard.style.display = 'none';
+    productCatalogView.style.display = 'block';
+  }
+
+  function renderPhotoGrid() {
+    const grid = document.getElementById('pfPhotoGrid');
+    grid.innerHTML = currentImages.map((img, i) => `
+      <div class="photo-grid-item${i === 0 ? ' cover' : ''}" data-photo-index="${i}">
+        ${i === 0 ? '<span class="cover-badge">Cover</span>' : ''}
+        <img src="${escapeHtml(img.url)}" alt="" onerror="handleImgError(this)">
+        <button type="button" class="del" data-remove-photo="${i}" aria-label="Remove photo">&times;</button>
+      </div>
+    `).join('');
+    grid.querySelectorAll('[data-remove-photo]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const i = Number(btn.dataset.removePhoto);
+        if (currentImages[i].isNew) URL.revokeObjectURL(currentImages[i].url);
+        currentImages.splice(i, 1);
+        renderPhotoGrid();
+      });
+    });
+    grid.querySelectorAll('[data-photo-index]').forEach(item => {
+      item.addEventListener('click', () => {
+        const i = Number(item.dataset.photoIndex);
+        if (i === 0) return;
+        const [moved] = currentImages.splice(i, 1);
+        currentImages.unshift(moved);
+        renderPhotoGrid();
+      });
+    });
+  }
+
+  document.getElementById('pfPhoto').addEventListener('change', (e) => {
+    [...e.target.files].forEach(file => {
+      currentImages.push({ url: URL.createObjectURL(file), path: null, isNew: true, file });
+    });
+    e.target.value = '';
+    renderPhotoGrid();
+  });
+
+  function renderSwatchChips() {
+    const wrap = document.getElementById('pfSwatchList');
+    wrap.innerHTML = currentSwatches.map((hex, i) => `
+      <span class="swatch-chip"><span class="dot" style="background:${hex}"></span><button type="button" data-remove-swatch="${i}">&times;</button></span>
+    `).join('');
+    wrap.querySelectorAll('[data-remove-swatch]').forEach(btn =>
+      btn.addEventListener('click', () => {
+        currentSwatches.splice(Number(btn.dataset.removeSwatch), 1);
+        renderSwatchChips();
+      }));
+  }
+  document.getElementById('pfSwatchAdd').addEventListener('click', () => {
+    currentSwatches.push(document.getElementById('pfSwatchColor').value);
+    renderSwatchChips();
+  });
+
+  document.getElementById('pfSave').addEventListener('click', saveProduct);
+
+  async function saveProduct() {
+    const name = document.getElementById('pfName').value.trim();
+    const price = Number(document.getElementById('pfPrice').value);
+    if (!name || !price) { setStatus('productStatus', 'Name and price are required.', true); return; }
+
+    const id = document.getElementById('pfId').value || null;
+    const sizes = [...document.querySelectorAll('.pf-size-cb:checked')].map(cb => cb.value);
+    const saveBtn = document.getElementById('pfSave');
+    saveBtn.disabled = true;
+    setStatus('productStatus', 'Saving…');
+
+    try {
+      const originalProduct = id ? products.find(p => p.id === id) : null;
+      const originalPaths = originalProduct
+        ? (originalProduct.image_paths && originalProduct.image_paths.length ? originalProduct.image_paths : [originalProduct.image_path].filter(Boolean))
+        : [];
+
+      for (const img of currentImages) {
+        if (img.isNew) {
+          const uploaded = await CarpeDB.uploadProductImage(img.file, name);
+          img.url = uploaded.url;
+          img.path = uploaded.path;
+          img.isNew = false;
+        }
+      }
+
+      const imageUrls = currentImages.map(img => img.url);
+      const imagePaths = currentImages.map(img => img.path);
+      const removedPaths = originalPaths.filter(p => !imagePaths.includes(p));
+
+      const payload = {
+        name,
+        price,
+        category: document.getElementById('pfCategory').value,
+        description: document.getElementById('pfDesc').value.trim(),
+        sizes,
+        swatch_colors: currentSwatches,
+        image_url: imageUrls[0] || null,
+        image_path: imagePaths[0] || null,
+        image_urls: imageUrls,
+        image_paths: imagePaths,
+        best_seller: document.getElementById('pfBestSeller').checked,
+        new_arrival: document.getElementById('pfNewArrival').checked,
+        trending: document.getElementById('pfTrending').checked
+      };
+
+      if (id) {
+        await CarpeDB.updateProduct(id, payload);
+      } else {
+        payload.slug = CarpeDB.slugify(name) + '-' + Date.now().toString(36);
+        await CarpeDB.insertProduct(payload);
+      }
+
+      for (const path of removedPaths) await CarpeDB.deleteImage(path);
+
+      closeProductForm();
+      setStatus('productStatus', 'Saved.');
+      await loadProducts();
+    } catch (err) {
+      setStatus('productStatus', 'Save failed: ' + err.message, true);
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  async function deleteProductRow(id) {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    if (!confirm(`Delete "${product.name}"? This can't be undone.`)) return;
+    try {
+      const paths = product.image_paths && product.image_paths.length ? product.image_paths : [product.image_path].filter(Boolean);
+      for (const path of paths) await CarpeDB.deleteImage(path);
+      await CarpeDB.deleteProduct(id);
+      await loadProducts();
+    } catch (err) {
+      setStatus('productStatus', 'Delete failed: ' + err.message, true);
+    }
+  }
+
+  // ===== Gallery =====
+  async function loadGallery() {
+    setStatus('galleryStatus', 'Loading gallery…');
+    try {
+      galleryItems = await CarpeDB.fetchGallery();
+      setStatus('galleryStatus', '');
+      renderGalleryAdminGrid();
+    } catch (err) {
+      setStatus('galleryStatus', 'Failed to load gallery: ' + err.message, true);
+    }
+  }
+
+  function renderGalleryAdminGrid() {
+    const wrap = document.getElementById('galleryAdminGrid');
+    wrap.innerHTML = '';
+    galleryItems.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'gallery-admin-item';
+      div.innerHTML = `
+        <img src="${escapeHtml(item.image_url)}" alt="" onerror="handleImgError(this)">
+        ${item.caption ? `<div class="cap">${escapeHtml(item.caption)}</div>` : ''}
+        <button class="del" data-gallery-delete="${item.id}" aria-label="Delete">&times;</button>`;
+      wrap.appendChild(div);
+    });
+    wrap.querySelectorAll('[data-gallery-delete]').forEach(btn =>
+      btn.addEventListener('click', () => deleteGalleryPhoto(btn.dataset.galleryDelete)));
+  }
+
+  document.getElementById('gfUpload').addEventListener('click', async () => {
+    const file = document.getElementById('gfPhoto').files[0];
+    if (!file) { setStatus('galleryStatus', 'Choose a photo first.', true); return; }
+    const caption = document.getElementById('gfCaption').value.trim();
+    setStatus('galleryStatus', 'Uploading…');
+    try {
+      const uploaded = await CarpeDB.uploadGalleryImage(file);
+      await CarpeDB.insertGalleryItem({
+        image_url: uploaded.url,
+        image_path: uploaded.path,
+        caption,
+        sort_order: galleryItems.length
+      });
+      document.getElementById('gfPhoto').value = '';
+      document.getElementById('gfCaption').value = '';
+      setStatus('galleryStatus', 'Added.');
+      await loadGallery();
+    } catch (err) {
+      setStatus('galleryStatus', 'Upload failed: ' + err.message, true);
+    }
+  });
+
+  async function deleteGalleryPhoto(id) {
+    const item = galleryItems.find(g => g.id === id);
+    if (!item) return;
+    if (!confirm('Remove this photo from the gallery?')) return;
+    try {
+      await CarpeDB.deleteImage(item.image_path);
+      await CarpeDB.deleteGalleryItem(id);
+      await loadGallery();
+    } catch (err) {
+      setStatus('galleryStatus', 'Delete failed: ' + err.message, true);
+    }
+  }
+
+  // ===== Orders =====
+  async function loadOrders() {
+    setStatus('orderStatus', 'Loading orders…');
+    try {
+      orders = await CarpeDB.fetchOrders();
+      setStatus('orderStatus', '');
+    } catch (err) {
+      setStatus('orderStatus', 'Failed to load orders: ' + err.message, true);
+    }
+    renderOrderBoard();
+  }
+
+  function stageLabel(key) {
+    const stage = CARPE_ORDER_STAGES.find(s => s.key === key);
+    return stage ? stage.label : key;
+  }
+
+  document.getElementById('orderSearch').addEventListener('input', renderOrderBoard);
+
+  document.querySelectorAll('[data-status-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      orderStatusFilter = orderStatusFilter === btn.dataset.statusFilter ? null : btn.dataset.statusFilter;
+      renderOrderBoard();
+    });
+  });
+
+  function renderOrderBoard() {
+    const term = document.getElementById('orderSearch').value.trim().toLowerCase();
+    const filtered = term
+      ? orders.filter(o =>
+          (o.order_number || '').toLowerCase().includes(term) ||
+          (o.customer_name || '').toLowerCase().includes(term) ||
+          (o.customer_email || '').toLowerCase().includes(term))
+      : orders;
+
+    document.getElementById('orderCount').textContent = `${filtered.length} order${filtered.length === 1 ? '' : 's'}`;
+
+    const cancelledOrders = filtered.filter(o => o.status === 'cancelled');
+    const refundedOrders = filtered.filter(o => o.status === 'refunded');
+    document.getElementById('cancelledCount').textContent = cancelledOrders.length;
+    document.getElementById('refundedCount').textContent = refundedOrders.length;
+    document.getElementById('filterCancelledBtn').classList.toggle('active', orderStatusFilter === 'cancelled');
+    document.getElementById('filterRefundedBtn').classList.toggle('active', orderStatusFilter === 'refunded');
+
+    function renderOrderCard(o, nextStage) {
+      const itemCount = (o.items || []).length;
+      return `
+        <div class="order-card" data-order-card="${o.id}">
+          <div class="oc-top"><span>${escapeHtml(o.order_number)}</span><span>${new Date(o.created_at).toLocaleDateString()}</span></div>
+          <div class="oc-customer">${escapeHtml(o.customer_name)}</div>
+          <div class="oc-meta">${itemCount} item${itemCount === 1 ? '' : 's'}</div>
+          <div class="oc-total">${formatPeso(o.total)}</div>
+          ${nextStage ? `<button type="button" class="btn btn-ghost btn-small oc-mark" data-advance="${o.id}">Mark ${nextStage.label}</button>` : ''}
+        </div>`;
+    }
+
+    const board = document.getElementById('orderBoard');
+
+    if (orderStatusFilter) {
+      const bucket = orderStatusFilter === 'cancelled' ? cancelledOrders : refundedOrders;
+      const label = orderStatusFilter === 'cancelled' ? 'Cancelled' : 'Refunded';
+      const color = orderStatusFilter === 'cancelled' ? '#f87171' : '#a1a1aa';
+      board.innerHTML = `
+        <div class="order-column">
+          <div class="order-column-head"><span class="stage-pill" style="background:${color}">${label}</span><span class="count">${bucket.length}</span></div>
+          ${bucket.map(o => renderOrderCard(o, null)).join('')}
+        </div>`;
+    } else {
+      board.innerHTML = CARPE_ORDER_STAGES.map((stage, stageIndex) => {
+        const stageOrders = filtered.filter(o => o.status === stage.key);
+        const nextStage = CARPE_ORDER_STAGES[stageIndex + 1];
+        const cards = stageOrders.map(o => renderOrderCard(o, nextStage)).join('');
+        return `
+          <div class="order-column">
+            <div class="order-column-head"><span class="stage-pill" style="background:${stage.color}">${stage.label}</span><span class="count">${stageOrders.length}</span></div>
+            ${cards}
+          </div>`;
+      }).join('');
+    }
+
+    board.querySelectorAll('[data-order-card]').forEach(card =>
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        openOrderForm(card.dataset.orderCard);
+      }));
+    board.querySelectorAll('[data-advance]').forEach(btn =>
+      btn.addEventListener('click', (e) => { e.stopPropagation(); advanceOrderStage(btn.dataset.advance); }));
+  }
+
+  async function advanceOrderStage(id) {
+    const order = orders.find(o => o.id === id);
+    if (!order) return;
+    const idx = CARPE_ORDER_STAGES.findIndex(s => s.key === order.status);
+    const next = CARPE_ORDER_STAGES[idx + 1];
+    if (!next) return;
+    try {
+      await CarpeDB.updateOrder(id, { status: next.key });
+      await loadOrders();
+    } catch (err) {
+      setStatus('orderStatus', 'Update failed: ' + err.message, true);
+    }
+  }
+
+  // ===== Order form (view/edit, swaps in over the board like the product form) =====
+  const orderFormCard = document.getElementById('orderFormCard');
+  const orderBoardView = document.getElementById('orderBoardView');
+
+  document.getElementById('ofBack').addEventListener('click', closeOrderForm);
+  document.getElementById('ofCancel').addEventListener('click', closeOrderForm);
+
+  function openOrderForm(id) {
+    const order = orders.find(o => o.id === id);
+    if (!order) return;
+
+    document.getElementById('orderFormTitle').textContent = order.order_number;
+    document.getElementById('ofCreatedAt').textContent = 'Placed ' + new Date(order.created_at).toLocaleString();
+    document.getElementById('ofId').value = order.id;
+    document.getElementById('ofCustomerName').value = order.customer_name || '';
+    document.getElementById('ofCustomerEmail').value = order.customer_email || '';
+    document.getElementById('ofCustomerPhone').value = order.customer_phone || '';
+    document.getElementById('ofNotes').value = order.notes || '';
+    document.getElementById('ofTracking').value = order.tracking_number || '';
+
+    const stage = CARPE_ORDER_STAGES.find(s => s.key === order.status);
+    const badge = document.getElementById('ofStatusBadge');
+    badge.textContent = stage ? stage.label : order.status;
+    badge.className = 'status-badge ' + order.status;
+
+    currentOrderItems = JSON.parse(JSON.stringify(order.items || []));
+    currentOrderStatus = order.status;
+    renderOrderItems();
+    renderStageStepper();
+    updateTrackingFieldState();
+
+    const canCancel = order.status !== 'cancelled' && order.status !== 'refunded' && order.status !== 'delivered';
+    const canRefund = order.status !== 'cancelled' && order.status !== 'refunded';
+    document.getElementById('ofCancelOrderBtn').style.display = canCancel ? '' : 'none';
+    document.getElementById('ofRefundOrderBtn').style.display = canRefund ? '' : 'none';
+
+    orderBoardView.style.display = 'none';
+    orderFormCard.style.display = 'block';
+    document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function closeOrderForm() {
+    orderFormCard.style.display = 'none';
+    orderBoardView.style.display = 'block';
+  }
+
+  function orderTotal() {
+    return currentOrderItems.reduce((sum, it) => sum + it.price * it.qty, 0);
+  }
+
+  function renderOrderItems() {
+    const wrap = document.getElementById('ofItemList');
+    wrap.innerHTML = currentOrderItems.map((it) => `
+      <div class="order-item-row">
+        <span class="oi-name">${escapeHtml(it.name)}</span>
+        <span class="oi-qty">x${it.qty}</span>
+        <span class="oi-subtotal">${formatPeso(it.price * it.qty)}</span>
+      </div>
+    `).join('');
+    document.getElementById('ofTotalDisplay').textContent = formatPeso(orderTotal());
+  }
+
+  function renderStageStepper() {
+    const wrap = document.getElementById('ofStageStepper');
+    const currentIndex = CARPE_ORDER_STAGES.findIndex(s => s.key === currentOrderStatus);
+    wrap.innerHTML = CARPE_ORDER_STAGES.map((s, i) => {
+      const cls = i < currentIndex ? 'done' : (i === currentIndex ? 'active' : '');
+      return `<div class="stage-step ${cls}" data-stage="${s.key}"><span class="dot"></span><span class="stage-label">${s.label}</span></div>`;
+    }).join('');
+    wrap.querySelectorAll('[data-stage]').forEach(el =>
+      el.addEventListener('click', () => {
+        currentOrderStatus = el.dataset.stage;
+        renderStageStepper();
+        updateTrackingFieldState();
+      }));
+  }
+
+  function updateTrackingFieldState() {
+    const preparingIndex = CARPE_ORDER_STAGES.findIndex(s => s.key === 'preparing');
+    const currentIndex = CARPE_ORDER_STAGES.findIndex(s => s.key === currentOrderStatus);
+    const unlocked = currentIndex >= preparingIndex;
+    const field = document.getElementById('ofTracking');
+    const hint = document.getElementById('ofTrackingHint');
+    field.disabled = !unlocked;
+    hint.textContent = unlocked
+      ? 'Shown to the customer on the order tracker once entered.'
+      : 'Unlocks once this order reaches the Preparing stage.';
+  }
+
+  document.getElementById('ofSave').addEventListener('click', saveOrder);
+
+  async function saveOrder() {
+    const customerName = document.getElementById('ofCustomerName').value.trim();
+    if (!customerName) { setStatus('orderStatus', 'Customer name is required.', true); return; }
+    if (!currentOrderItems.length) { setStatus('orderStatus', 'Add at least one item.', true); return; }
+
+    const id = document.getElementById('ofId').value;
+    const saveBtn = document.getElementById('ofSave');
+    saveBtn.disabled = true;
+    setStatus('orderStatus', 'Saving…');
+
+    try {
+      const payload = {
+        customer_name: customerName,
+        customer_email: document.getElementById('ofCustomerEmail').value.trim() || null,
+        customer_phone: document.getElementById('ofCustomerPhone').value.trim() || null,
+        items: currentOrderItems,
+        total: orderTotal(),
+        status: currentOrderStatus,
+        notes: document.getElementById('ofNotes').value.trim() || null,
+        tracking_number: document.getElementById('ofTracking').disabled ? null : (document.getElementById('ofTracking').value.trim() || null)
+      };
+
+      await CarpeDB.updateOrder(id, payload);
+      closeOrderForm();
+      setStatus('orderStatus', 'Saved.');
+      await loadOrders();
+    } catch (err) {
+      setStatus('orderStatus', 'Save failed: ' + err.message, true);
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  document.getElementById('ofCancelOrderBtn').addEventListener('click', async () => {
+    const id = document.getElementById('ofId').value;
+    if (!id || !confirm('Cancel this order?')) return;
+    try {
+      await CarpeDB.updateOrder(id, { status: 'cancelled' });
+      closeOrderForm();
+      await loadOrders();
+    } catch (err) {
+      setStatus('orderStatus', 'Update failed: ' + err.message, true);
+    }
+  });
+
+  document.getElementById('ofRefundOrderBtn').addEventListener('click', async () => {
+    const id = document.getElementById('ofId').value;
+    if (!id || !confirm('Mark this order as refunded?')) return;
+    try {
+      await CarpeDB.updateOrder(id, { status: 'refunded' });
+      closeOrderForm();
+      await loadOrders();
+    } catch (err) {
+      setStatus('orderStatus', 'Update failed: ' + err.message, true);
+    }
+  });
+
+  document.getElementById('ofDeleteOrderBtn').addEventListener('click', async () => {
+    const id = document.getElementById('ofId').value;
+    const order = orders.find(o => o.id === id);
+    if (!order) return;
+    if (!confirm(`Delete order "${order.order_number}"? This can't be undone.`)) return;
+    try {
+      await CarpeDB.deleteOrder(id);
+      closeOrderForm();
+      await loadOrders();
+    } catch (err) {
+      setStatus('orderStatus', 'Delete failed: ' + err.message, true);
+    }
+  });
+
+  // ===== Promos =====
+  async function loadPromos() {
+    setStatus('promoStatus', 'Loading promo codes…');
+    try {
+      promos = await CarpeDB.fetchPromos();
+      setStatus('promoStatus', '');
+      renderPromoTable();
+    } catch (err) {
+      setStatus('promoStatus', 'Failed to load promo codes: ' + err.message, true);
+    }
+  }
+
+  function formatDiscount(p) {
+    return p.discount_type === 'percent' ? `${p.discount_value}% off` : `${formatPeso(p.discount_value)} off`;
+  }
+
+  function formatPromoRules(p) {
+    const rules = [];
+    if (p.min_subtotal) rules.push(`min ${formatPeso(p.min_subtotal)}`);
+    if (p.max_uses) rules.push(`max ${p.max_uses} uses`);
+    if (p.one_per_email) rules.push('once per email');
+    return rules.length ? rules.join(' · ') : '—';
+  }
+
+  function renderPromoTable() {
+    const body = document.getElementById('promoTableBody');
+    body.innerHTML = '';
+    promos.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(p.code)}</td>
+        <td>${formatDiscount(p)}</td>
+        <td>${formatPromoRules(p)}</td>
+        <td>${p.uses}${p.max_uses ? ' / ' + p.max_uses : ' used'}</td>
+        <td><span class="status-badge ${p.active ? 'active' : 'inactive'}">${p.active ? 'Active' : 'Inactive'}</span></td>
+        <td class="row-actions">
+          <button class="table-link" data-edit-promo="${p.id}">Edit</button>
+          <button class="table-link danger" data-delete-promo="${p.id}">Delete</button>
+        </td>`;
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('[data-edit-promo]').forEach(btn =>
+      btn.addEventListener('click', () => openPromoForm(btn.dataset.editPromo)));
+    body.querySelectorAll('[data-delete-promo]').forEach(btn =>
+      btn.addEventListener('click', () => deletePromoRow(btn.dataset.deletePromo)));
+  }
+
+  const promoFormCard = document.getElementById('promoFormCard');
+  const promoCatalogView = document.getElementById('promoCatalogView');
+
+  document.getElementById('addPromoBtn').addEventListener('click', () => openPromoForm(null));
+  document.getElementById('pmCancel').addEventListener('click', closePromoForm);
+  document.getElementById('pmBack').addEventListener('click', closePromoForm);
+
+  document.getElementById('pmTypeToggle').addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    promoDiscountType = btn.dataset.type;
+    document.querySelectorAll('#pmTypeToggle button').forEach(b => b.classList.toggle('active', b === btn));
+  });
+
+  function openPromoForm(id) {
+    const promo = id ? promos.find(p => p.id === id) : null;
+    document.getElementById('promoFormTitle').textContent = promo ? 'Edit Promo Code' : 'New Promo Code';
+    document.getElementById('pmId').value = promo ? promo.id : '';
+    document.getElementById('pmCode').value = promo ? promo.code : '';
+    document.getElementById('pmValue').value = promo ? promo.discount_value : '';
+    document.getElementById('pmMinSubtotal').value = promo && promo.min_subtotal ? promo.min_subtotal : '';
+    document.getElementById('pmMaxUses').value = promo && promo.max_uses ? promo.max_uses : '';
+    document.getElementById('pmExpires').value = promo && promo.expires_at ? promo.expires_at.slice(0, 16) : '';
+    document.getElementById('pmOnePerEmail').checked = promo ? !!promo.one_per_email : false;
+    document.getElementById('pmActive').checked = promo ? !!promo.active : true;
+
+    promoDiscountType = promo ? promo.discount_type : 'percent';
+    document.querySelectorAll('#pmTypeToggle button').forEach(b => b.classList.toggle('active', b.dataset.type === promoDiscountType));
+
+    promoCatalogView.style.display = 'none';
+    promoFormCard.style.display = 'block';
+    document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function closePromoForm() {
+    promoFormCard.style.display = 'none';
+    promoCatalogView.style.display = 'block';
+  }
+
+  document.getElementById('pmSave').addEventListener('click', savePromo);
+
+  async function savePromo() {
+    const code = document.getElementById('pmCode').value.trim().toUpperCase();
+    const value = Number(document.getElementById('pmValue').value);
+    if (!code || !value) { setStatus('promoStatus', 'Code and discount value are required.', true); return; }
+
+    const id = document.getElementById('pmId').value || null;
+    const saveBtn = document.getElementById('pmSave');
+    saveBtn.disabled = true;
+    setStatus('promoStatus', 'Saving…');
+
+    try {
+      const minSubtotal = document.getElementById('pmMinSubtotal').value;
+      const maxUses = document.getElementById('pmMaxUses').value;
+      const expires = document.getElementById('pmExpires').value;
+
+      const payload = {
+        code,
+        discount_type: promoDiscountType,
+        discount_value: value,
+        min_subtotal: minSubtotal ? Number(minSubtotal) : null,
+        max_uses: maxUses ? Number(maxUses) : null,
+        one_per_email: document.getElementById('pmOnePerEmail').checked,
+        active: document.getElementById('pmActive').checked,
+        expires_at: expires ? new Date(expires).toISOString() : null
+      };
+
+      if (id) {
+        await CarpeDB.updatePromo(id, payload);
+      } else {
+        await CarpeDB.insertPromo(payload);
+      }
+
+      closePromoForm();
+      setStatus('promoStatus', 'Saved.');
+      await loadPromos();
+    } catch (err) {
+      setStatus('promoStatus', 'Save failed: ' + err.message, true);
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  async function deletePromoRow(id) {
+    const promo = promos.find(p => p.id === id);
+    if (!promo) return;
+    if (!confirm(`Delete promo code "${promo.code}"? This can't be undone.`)) return;
+    try {
+      await CarpeDB.deletePromo(id);
+      await loadPromos();
+    } catch (err) {
+      setStatus('promoStatus', 'Delete failed: ' + err.message, true);
+    }
+  }
+
+  // ===== Categories =====
+  async function loadCategories() {
+    setStatus('categoryStatus', 'Loading categories…');
+    try {
+      categories = await CarpeDB.fetchCategories();
+      setStatus('categoryStatus', '');
+      renderCategoryTable();
+    } catch (err) {
+      setStatus('categoryStatus', 'Failed to load categories: ' + err.message, true);
+    }
+  }
+
+  function renderCategoryTable() {
+    const body = document.getElementById('categoryTableBody');
+    body.innerHTML = '';
+    categories.forEach(cat => {
+      const inUse = products.filter(p => p.category === cat.slug).length;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(cat.label)}</td>
+        <td>${escapeHtml(cat.slug)}</td>
+        <td>${inUse}</td>
+        <td><button class="table-link danger" data-delete-category="${cat.id}">Delete</button></td>`;
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('[data-delete-category]').forEach(btn =>
+      btn.addEventListener('click', () => deleteCategoryRow(btn.dataset.deleteCategory)));
+  }
+
+  document.getElementById('catAdd').addEventListener('click', async () => {
+    const name = document.getElementById('catName').value.trim();
+    if (!name) { setStatus('categoryStatus', 'Enter a category name.', true); return; }
+    const slug = CarpeDB.slugify(name);
+    if (!slug) { setStatus('categoryStatus', 'Enter a valid category name.', true); return; }
+    if (CARPE_CATEGORIES.some(c => c.slug === slug)) { setStatus('categoryStatus', 'That category already exists.', true); return; }
+    setStatus('categoryStatus', 'Adding…');
+    try {
+      await CarpeDB.insertCategory({ slug, label: name });
+      document.getElementById('catName').value = '';
+      await syncCategoriesFromDB();
+      populateCategorySelect();
+      populateCategoryFilter();
+      setStatus('categoryStatus', 'Added.');
+      await loadCategories();
+    } catch (err) {
+      setStatus('categoryStatus', 'Add failed: ' + err.message, true);
+    }
+  });
+
+  async function deleteCategoryRow(id) {
+    const cat = categories.find(c => c.id === id);
+    if (!cat) return;
+    const inUse = products.filter(p => p.category === cat.slug).length;
+    if (inUse > 0) {
+      setStatus('categoryStatus', `${inUse} product${inUse === 1 ? '' : 's'} still use "${cat.label}" — reassign them first.`, true);
+      return;
+    }
+    if (!confirm(`Delete category "${cat.label}"? This can't be undone.`)) return;
+    try {
+      await CarpeDB.deleteCategory(id);
+      const idx = CARPE_CATEGORIES.findIndex(c => c.slug === cat.slug);
+      if (idx !== -1) CARPE_CATEGORIES.splice(idx, 1);
+      populateCategorySelect();
+      populateCategoryFilter();
+      await loadCategories();
+    } catch (err) {
+      setStatus('categoryStatus', 'Delete failed: ' + err.message, true);
+    }
+  }
+
+  // ===== Shipping =====
+  async function loadShippingSettings() {
+    setStatus('shippingStatus', 'Loading shipping settings…');
+    try {
+      const settings = await CarpeDB.fetchShippingSettings();
+      if (!settings) {
+        setStatus('shippingStatus', 'No shipping_settings row found — run the latest migration in supabase_setup.sql.', true);
+        return;
+      }
+      document.getElementById('shFlatRate').value = settings.flat_rate;
+      document.getElementById('shFreeThreshold').value = settings.free_shipping_threshold;
+      document.getElementById('shPickupEnabled').checked = settings.pickup_enabled;
+      document.getElementById('shPickupName').value = settings.pickup_name || '';
+      document.getElementById('shPickupAddress').value = settings.pickup_address || '';
+      document.getElementById('shPickupHours').value = settings.pickup_hours || '';
+      setStatus('shippingStatus', '');
+    } catch (err) {
+      setStatus('shippingStatus', 'Failed to load shipping settings: ' + err.message, true);
+    }
+  }
+
+  document.getElementById('shSave').addEventListener('click', async () => {
+    const flatRate = Number(document.getElementById('shFlatRate').value);
+    const freeThreshold = Number(document.getElementById('shFreeThreshold').value);
+    if (!(flatRate >= 0) || !(freeThreshold >= 0)) {
+      setStatus('shippingStatus', 'Enter valid non-negative amounts.', true);
+      return;
+    }
+    setStatus('shippingStatus', 'Saving…');
+    try {
+      await CarpeDB.updateShippingSettings({
+        flat_rate: flatRate,
+        free_shipping_threshold: freeThreshold,
+        pickup_enabled: document.getElementById('shPickupEnabled').checked,
+        pickup_name: document.getElementById('shPickupName').value.trim(),
+        pickup_address: document.getElementById('shPickupAddress').value.trim(),
+        pickup_hours: document.getElementById('shPickupHours').value.trim()
+      });
+      setStatus('shippingStatus', 'Saved.');
+    } catch (err) {
+      setStatus('shippingStatus', 'Save failed: ' + err.message, true);
+    }
+  });
+
+  // ===== Reviews =====
+  async function loadReviews() {
+    setStatus('reviewStatus', 'Loading reviews…');
+    try {
+      reviews = await CarpeDB.fetchAllReviews();
+      setStatus('reviewStatus', '');
+      renderReviewAdminList();
+    } catch (err) {
+      setStatus('reviewStatus', 'Failed to load reviews: ' + err.message, true);
+    }
+  }
+
+  function renderReviewAdminList() {
+    const wrap = document.getElementById('reviewAdminList');
+    const showApprovedToo = document.getElementById('reviewShowApprovedToo').checked;
+    const visible = showApprovedToo ? reviews : reviews.filter(r => !r.approved);
+    wrap.innerHTML = '';
+    if (!visible.length) {
+      wrap.innerHTML = `<p class="page-sub">${showApprovedToo ? 'No reviews yet.' : 'No pending reviews.'}</p>`;
+      return;
+    }
+    visible.forEach(r => {
+      const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+      const imgHtml = r.image_url
+        ? `<img class="rac-img" src="${r.image_url}" alt="">`
+        : `<div class="rac-img ph">No Photo</div>`;
+      const div = document.createElement('div');
+      div.className = 'review-admin-card' + (r.approved ? '' : ' is-pending');
+      div.innerHTML = `
+        ${imgHtml}
+        <div class="rac-body">
+          <div class="rac-top">
+            <div>
+              <div class="rac-name">${escapeHtml(r.customer_name)}</div>
+              <div class="rac-product">${escapeHtml(r.product_name)} &middot; Order ${escapeHtml(r.order_number)}</div>
+            </div>
+            <span class="rac-badge ${r.approved ? 'approved' : 'pending'}">${r.approved ? 'Approved' : 'Pending'}</span>
+          </div>
+          <div class="rac-stars">${stars}</div>
+          <p class="rac-comment">"${escapeHtml(r.comment)}"</p>
+          <div class="rac-actions">
+            ${r.approved
+              ? `<button class="table-link" data-unapprove-review="${r.id}">Unapprove</button>`
+              : `<button class="btn btn-solid btn-small" data-approve-review="${r.id}">Approve</button>`}
+            <button class="table-link danger" data-delete-review="${r.id}">Delete</button>
+          </div>
+        </div>`;
+      wrap.appendChild(div);
+    });
+    wrap.querySelectorAll('[data-approve-review]').forEach(btn =>
+      btn.addEventListener('click', () => setReviewApproval(btn.dataset.approveReview, true)));
+    wrap.querySelectorAll('[data-unapprove-review]').forEach(btn =>
+      btn.addEventListener('click', () => setReviewApproval(btn.dataset.unapproveReview, false)));
+    wrap.querySelectorAll('[data-delete-review]').forEach(btn =>
+      btn.addEventListener('click', () => deleteReviewRow(btn.dataset.deleteReview)));
+  }
+
+  document.getElementById('reviewShowApprovedToo').addEventListener('change', renderReviewAdminList);
+
+  async function setReviewApproval(id, approved) {
+    try {
+      await CarpeDB.updateReview(id, { approved });
+      await loadReviews();
+    } catch (err) {
+      setStatus('reviewStatus', 'Update failed: ' + err.message, true);
+    }
+  }
+
+  async function deleteReviewRow(id) {
+    const review = reviews.find(r => r.id === id);
+    if (!review) return;
+    if (!confirm('Delete this review? This can\'t be undone.')) return;
+    try {
+      if (review.image_path) await CarpeDB.deleteImage(review.image_path);
+      await CarpeDB.deleteReview(id);
+      await loadReviews();
+    } catch (err) {
+      setStatus('reviewStatus', 'Delete failed: ' + err.message, true);
+    }
+  }
+
+  // ===== Account =====
+  document.getElementById('acChangePassword').addEventListener('click', async () => {
+    const current = document.getElementById('acCurrentPassword').value;
+    const next = document.getElementById('acNewPassword').value;
+    const confirmVal = document.getElementById('acConfirmPassword').value;
+
+    const expected = await getAdminPassword();
+    if (current !== expected) { setStatus('accountStatus', 'Current password is incorrect.', true); return; }
+    if (!next || next.length < 4) { setStatus('accountStatus', 'New password must be at least 4 characters.', true); return; }
+    if (next !== confirmVal) { setStatus('accountStatus', 'New password and confirmation do not match.', true); return; }
+
+    try {
+      const settings = await CarpeDB.updateAdminSettings({ password_override: next });
+      adminSettingsPromise = Promise.resolve(settings);
+      document.getElementById('acCurrentPassword').value = '';
+      document.getElementById('acNewPassword').value = '';
+      document.getElementById('acConfirmPassword').value = '';
+      setStatus('accountStatus', 'Password changed.');
+    } catch (err) {
+      setStatus('accountStatus', 'Failed to save: ' + err.message, true);
+    }
+  });
+</script>
+</body>
+</html>

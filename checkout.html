@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — CARPE</title>
+<meta name="description" content="Complete your CARPE order — shipping details and order summary.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#0a0a0a;
+    --near-black:#141414;
+    --white:#ffffff;
+    --off-white:#111009;
+    --gray-100:rgba(255,255,255,.07);
+    --gray-300:#bdbdbb;
+    --gray-500:#8a8a88;
+    --gray-700:#b8b5ac;
+    --accent:#c81e2c;
+    --accent-dark:#8f0f1b;
+    --metal:#b7a582;
+    --metal-dim:rgba(183,165,130,.35);
+    --metal-line:linear-gradient(90deg, transparent, var(--metal), transparent);
+    --accent-grad:linear-gradient(135deg, #d92438 0%, #8f0f1b 100%);
+    --shadow-soft:0 20px 40px -20px rgba(0,0,0,.35);
+    --shadow-lift:0 30px 60px -20px rgba(0,0,0,.5);
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  img{display:block;width:100%;height:100%;object-fit:cover;}
+  .container{max-width:1320px;margin:0 auto;padding:0 24px;}
+  .btn{
+    position:relative;overflow:hidden;
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    padding:14px 28px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
+    border:1px solid var(--black);cursor:pointer;transition:all .4s var(--ease);white-space:nowrap;
+    border-radius:8px;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-outline{background:transparent;color:var(--white);border-color:rgba(255,255,255,.7);}
+  .btn-outline:hover{background:var(--white);color:var(--black);border-color:var(--white);box-shadow:0 14px 30px -10px rgba(0,0,0,.5);}
+  .btn-primary{background:var(--accent-grad);color:#fff;border:1px solid transparent;}
+  .btn-primary:hover{box-shadow:0 14px 30px -10px rgba(200,30,44,.6);}
+  .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+
+  .grain-overlay{
+    position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ===== SIMPLIFIED HEADER ===== */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 32px;transition:all .4s var(--ease);
+    background:rgba(10,10,10,.92);backdrop-filter:blur(10px);color:var(--white);
+    box-shadow:0 1px 0 rgba(183,165,130,.25);
+  }
+  header.scrolled{padding:14px 32px;}
+  .logo{font-family:var(--font-display);font-size:25px;letter-spacing:.14em;font-weight:500;display:inline-flex;align-items:center;}
+  .logo-mark{color:var(--metal);display:inline-flex;margin-left:6px;}
+  .logo-mark svg{width:15px;height:15px;}
+  .secure-badge{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-500);}
+  .secure-badge svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;}
+
+  section{padding:72px 0;}
+  .bg-black{
+    background:
+      radial-gradient(ellipse 60% 50% at 12% 0%, rgba(200,30,44,.10), transparent 60%),
+      radial-gradient(ellipse 50% 45% at 100% 100%, rgba(183,165,130,.06), transparent 65%),
+      linear-gradient(165deg,#141414 0%,#050505 65%,#000 100%);
+    color:var(--white);
+  }
+
+  /* ===== PAGE BANNER ===== */
+  .page-banner{
+    padding:100px 0 40px;text-align:center;
+    background:radial-gradient(ellipse 60% 60% at 50% 0%, rgba(183,165,130,.09), transparent 65%), var(--black);
+    border-bottom:1px solid var(--metal-dim);
+  }
+  .breadcrumb{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-500);margin-bottom:18px;}
+  .breadcrumb a:hover{color:var(--metal);}
+  .breadcrumb .sep{margin:0 8px;color:var(--metal-dim);}
+  .page-banner h1{font-family:var(--font-display);font-size:clamp(38px,6vw,64px);font-weight:340;color:#fff;}
+
+  /* ===== CHECKOUT ===== */
+  .checkout-layout{display:grid;grid-template-columns:1.6fr 1fr;gap:36px;align-items:start;}
+  .checkout-form{display:flex;flex-direction:column;gap:22px;}
+  .form-section-title{font-family:var(--font-display);font-size:18px;font-weight:400;margin-bottom:12px;color:#fff;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .form-field{display:flex;flex-direction:column;}
+  .form-field.full{grid-column:1/-1;}
+  .form-field label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-500);margin-bottom:5px;}
+  .form-field input,.form-field select{
+    background:var(--near-black);border:1px solid rgba(255,255,255,.14);color:#fff;
+    padding:10px 14px;font-size:13px;font-family:inherit;border-radius:10px;transition:border-color .25s var(--ease);
+  }
+  .form-field input:focus,.form-field select:focus{outline:none;border-color:var(--metal);}
+  .form-field select{appearance:none;-webkit-appearance:none;cursor:pointer;}
+
+  .delivery-options{display:flex;flex-direction:column;gap:10px;}
+  .delivery-option{
+    display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid rgba(255,255,255,.14);
+    border-radius:10px;cursor:pointer;background:var(--near-black);transition:border-color .25s var(--ease),background .25s var(--ease);
+  }
+  .delivery-option:hover{border-color:var(--metal-dim);}
+  .delivery-option input{margin-top:3px;accent-color:var(--metal);flex:none;cursor:pointer;}
+  .delivery-option.active{border-color:var(--metal);background:rgba(183,165,130,.07);}
+  .delivery-option-body{flex:1;display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+  .delivery-option-title{font-size:13px;font-weight:600;color:#fff;}
+  .delivery-option-desc{font-size:11px;color:var(--gray-500);margin-top:3px;}
+  .delivery-option-price{font-size:12px;color:var(--gray-700);white-space:nowrap;}
+  .pickup-info{
+    margin-top:4px;padding:14px 16px;border:1px dashed var(--metal-dim);border-radius:10px;
+    font-size:12px;line-height:1.7;color:var(--gray-300);display:none;
+  }
+  .pickup-info strong{color:#fff;}
+
+  .order-summary{background:#0e0e0d;border:1px solid var(--metal-dim);padding:24px;position:sticky;top:110px;}
+  .order-summary h3{font-family:var(--font-display);font-size:20px;font-weight:400;margin-bottom:22px;color:#fff;}
+  .summary-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08);}
+  .summary-item-img{width:56px;height:70px;flex:none;overflow:hidden;background:#111;}
+  .summary-item-info{flex:1;min-width:0;}
+  .summary-item-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;}
+  .summary-item-meta{font-size:11px;color:var(--gray-500);}
+  .summary-item-price{font-size:13px;color:var(--gray-700);white-space:nowrap;}
+  .promo-row{display:flex;gap:8px;margin-top:20px;}
+  .promo-row input{flex:1;background:var(--near-black);border:1px solid rgba(255,255,255,.14);color:#fff;padding:10px 14px;font-size:13px;font-family:inherit;border-radius:10px;}
+  .promo-row input:focus{outline:none;border-color:var(--metal);}
+  .promo-row .btn{padding:10px 18px;font-size:11px;border-radius:10px;}
+  .promo-message{font-size:12px;margin-top:8px;min-height:16px;color:var(--gray-500);}
+  .promo-message.success{color:#7ed99a;}
+  .promo-message.error{color:#e2717a;}
+  .summary-totals{margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);}
+  .summary-row{display:flex;justify-content:space-between;font-size:13px;color:var(--gray-300);padding:6px 0;}
+  .summary-row.summary-total{font-size:16px;font-weight:700;color:#fff;padding-top:14px;margin-top:8px;border-top:1px solid rgba(255,255,255,.1);}
+  #continueToPaymentBtn{width:100%;margin-top:22px;}
+  .checkout-note{font-size:11px;color:var(--gray-500);margin-top:14px;text-align:center;}
+  .checkout-error{background:rgba(200,30,44,.12);border:1px solid rgba(200,30,44,.4);color:#f2a5ab;padding:12px 16px;font-size:13px;margin-bottom:0;max-height:0;opacity:0;overflow:hidden;transition:max-height .4s var(--ease), opacity .3s var(--ease), margin-bottom .4s var(--ease);}
+  .checkout-error.show{max-height:120px;opacity:1;margin-bottom:24px;}
+
+  .empty-checkout{text-align:center;padding:80px 0;display:none;}
+  .empty-checkout p{color:var(--gray-500);margin-bottom:24px;font-size:15px;}
+  .order-confirmation{text-align:center;padding:80px 0;max-width:520px;margin:0 auto;display:none;}
+  .order-confirmation h2{font-family:var(--font-display);font-size:clamp(28px,4vw,40px);font-weight:400;margin-bottom:18px;color:#fff;}
+  .order-confirmation p{color:var(--gray-300);line-height:1.7;margin-bottom:12px;font-size:14px;}
+  .order-confirmation .btn{margin-top:20px;}
+
+  /* ===== FOOTER ===== */
+  footer{position:relative;background:linear-gradient(180deg,#0c0c0c 0%,#000 100%);color:var(--gray-300);padding:56px 0 0;}
+  footer::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--metal-line);}
+  .footer-crest{
+    position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:32px;height:32px;
+    background:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    color:var(--metal);box-shadow:0 0 0 1px var(--metal-dim),0 8px 20px -6px rgba(0,0,0,.6);z-index:2;
+  }
+  .footer-crest svg{width:16px;height:16px;}
+  .footer-top{display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:32px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.1);}
+  .footer-brand .logo{margin-bottom:16px;}
+  .footer-brand p{font-size:13px;line-height:1.7;color:var(--gray-500);max-width:280px;}
+  .social-row{display:flex;gap:14px;margin-top:22px;}
+  .social-row a{width:36px;height:36px;border:1px solid rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.3s var(--ease);}
+  .social-row a:hover{background:var(--accent);border-color:var(--accent);}
+  .social-row svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.6;}
+  .footer-col h4{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#fff;margin-bottom:20px;font-weight:700;}
+  .footer-col li{margin-bottom:12px;}
+  .footer-col a{font-size:13px;color:var(--gray-300);transition:.25s var(--ease);}
+  .footer-col a:hover{color:var(--accent);}
+  .payment-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .pay-chip{
+    border:1px solid rgba(255,255,255,.2);padding:6px 12px;font-size:10px;letter-spacing:.06em;
+    text-transform:uppercase;border-radius:3px;color:var(--gray-300);
+  }
+  .footer-bottom{
+    display:flex;justify-content:space-between;align-items:center;padding:20px 0;font-size:12px;color:var(--gray-500);
+    flex-wrap:wrap;gap:12px;
+  }
+  .footer-bottom .legal-links{display:flex;gap:22px;}
+
+  /* ===== responsive ===== */
+  @media (max-width:1024px){
+    header{padding:18px 24px;}
+    header.scrolled{padding:12px 24px;}
+    .container{padding:0 20px;}
+    section{padding:60px 0;}
+    .page-banner{padding:90px 0 36px;}
+    .checkout-layout{grid-template-columns:1fr;gap:28px;}
+    .order-summary{position:static;}
+    .footer-top{grid-template-columns:1fr 1fr;gap:36px;}
+  }
+  @media (max-width:768px){
+    .footer-top{grid-template-columns:1fr;gap:36px;}
+  }
+  @media (max-width:600px){
+    section{padding:44px 0;}
+    header{padding:14px 16px;}
+    .logo{font-size:21px;}
+    .secure-badge span{display:none;}
+    .page-banner{padding:90px 0 32px;}
+    .form-grid{grid-template-columns:1fr;}
+    .order-summary{padding:20px;}
+    .footer-top{grid-template-columns:1fr;gap:36px;}
+    .footer-bottom{flex-direction:column;align-items:flex-start;gap:14px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Reusable brand mark -->
+<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <symbol id="ornateCross" viewBox="0 0 100 100">
+    <g fill="currentColor">
+      <rect x="42" y="4" width="16" height="92" rx="3"/>
+      <rect x="4" y="42" width="92" height="16" rx="3"/>
+      <circle cx="50" cy="10" r="9"/>
+      <circle cx="39" cy="15" r="6"/>
+      <circle cx="61" cy="15" r="6"/>
+      <circle cx="50" cy="90" r="9"/>
+      <circle cx="39" cy="85" r="6"/>
+      <circle cx="61" cy="85" r="6"/>
+      <circle cx="10" cy="50" r="9"/>
+      <circle cx="15" cy="39" r="6"/>
+      <circle cx="15" cy="61" r="6"/>
+      <circle cx="90" cy="50" r="9"/>
+      <circle cx="85" cy="39" r="6"/>
+      <circle cx="85" cy="61" r="6"/>
+      <rect x="44" y="44" width="12" height="12" transform="rotate(45 50 50)"/>
+    </g>
+  </symbol>
+</svg>
+<div class="grain-overlay" aria-hidden="true"></div>
+
+<!-- ============ HEADER (simplified — no nav/search/cart) ============ -->
+<header id="siteHeader">
+  <a href="index.html" class="logo">CARPE<span class="logo-mark"><svg viewBox="0 0 100 100"><use href="#ornateCross"/></svg></span></a>
+  <div class="secure-badge">
+    <svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <span>Secure Checkout</span>
+  </div>
+</header>
+
+<!-- ============ PAGE BANNER ============ -->
+<section class="page-banner">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><a href="shop.html">Shop</a><span class="sep">/</span>Checkout</div>
+    <h1>Checkout</h1>
+  </div>
+</section>
+
+<!-- ============ CHECKOUT ============ -->
+<section class="bg-black">
+  <div class="container">
+    <div class="checkout-error" id="checkoutError"></div>
+
+    <div class="checkout-layout" id="checkoutLayout">
+      <form class="checkout-form" id="checkoutForm">
+        <div class="form-section">
+          <h3 class="form-section-title">Contact</h3>
+          <div class="form-field full">
+            <label for="ckEmail">Email address</label>
+            <input type="email" id="ckEmail" autocomplete="email" required>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="form-section-title">Delivery Method</h3>
+          <div class="delivery-options">
+            <label class="delivery-option active" id="optShip">
+              <input type="radio" name="deliveryMethod" value="ship" checked>
+              <div class="delivery-option-body">
+                <div>
+                  <div class="delivery-option-title">Standard Shipping</div>
+                  <div class="delivery-option-desc">Delivered in 3–5 business days</div>
+                </div>
+                <div class="delivery-option-price" id="shipOptionPrice">₱150</div>
+              </div>
+            </label>
+            <label class="delivery-option" id="optPickup">
+              <input type="radio" name="deliveryMethod" value="pickup">
+              <div class="delivery-option-body">
+                <div>
+                  <div class="delivery-option-title">Store Pickup</div>
+                  <div class="delivery-option-desc">Ready in 1–2 business days</div>
+                </div>
+                <div class="delivery-option-price">Free</div>
+              </div>
+            </label>
+          </div>
+          <div class="pickup-info" id="pickupInfo">
+            <strong id="pickupInfoName">CARPE Flagship Store</strong><br>
+            <span id="pickupInfoAddress">123 Poblacion Ave, Makati City, Metro Manila</span><br>
+            <span id="pickupInfoHours">Mon–Sat, 11AM–8PM</span> · We'll email you when it's ready.
+          </div>
+        </div>
+
+        <div class="form-section" id="pickupDetailsSection" style="display:none;">
+          <h3 class="form-section-title">Pickup Details</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="ckPickupFirstName">First Name</label>
+              <input id="ckPickupFirstName" autocomplete="given-name">
+            </div>
+            <div class="form-field">
+              <label for="ckPickupLastName">Last Name</label>
+              <input id="ckPickupLastName" autocomplete="family-name">
+            </div>
+            <div class="form-field">
+              <label for="ckPickupPhone">Phone</label>
+              <input type="tel" id="ckPickupPhone" autocomplete="tel">
+            </div>
+            <div class="form-field">
+              <label for="ckPickupDateTime">Estimated Pickup Date &amp; Time</label>
+              <input type="datetime-local" id="ckPickupDateTime">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section" id="shippingAddressSection">
+          <h3 class="form-section-title">Shipping Address</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="ckFirstName">First Name</label>
+              <input id="ckFirstName" autocomplete="given-name" required>
+            </div>
+            <div class="form-field">
+              <label for="ckLastName">Last Name</label>
+              <input id="ckLastName" autocomplete="family-name" required>
+            </div>
+            <div class="form-field full">
+              <label for="ckCountry">Country</label>
+              <select id="ckCountry" autocomplete="country-name">
+                <option selected>Philippines</option>
+                <option>United States</option>
+                <option>Canada</option>
+                <option>United Kingdom</option>
+                <option>Australia</option>
+                <option>New Zealand</option>
+                <option>Singapore</option>
+                <option>Malaysia</option>
+                <option>Indonesia</option>
+                <option>Thailand</option>
+                <option>Vietnam</option>
+                <option>Japan</option>
+                <option>South Korea</option>
+                <option>Hong Kong</option>
+                <option>United Arab Emirates</option>
+                <option>Germany</option>
+                <option>France</option>
+                <option>Italy</option>
+                <option>Spain</option>
+              </select>
+            </div>
+            <div class="form-field full">
+              <label for="ckAddress1">Address Line 1</label>
+              <input id="ckAddress1" autocomplete="address-line1" required>
+            </div>
+            <div class="form-field full">
+              <label for="ckAddress2">Address Line 2 (Optional)</label>
+              <input id="ckAddress2" autocomplete="address-line2">
+            </div>
+            <div class="form-field">
+              <label for="ckCity">City</label>
+              <input id="ckCity" autocomplete="address-level2" required>
+            </div>
+            <div class="form-field">
+              <label for="ckRegion">Region</label>
+              <input id="ckRegion" autocomplete="address-level1" required>
+            </div>
+            <div class="form-field">
+              <label for="ckPostal">Postal Code</label>
+              <input id="ckPostal" autocomplete="postal-code" required>
+            </div>
+            <div class="form-field">
+              <label for="ckPhone">Phone</label>
+              <input type="tel" id="ckPhone" autocomplete="tel" required>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <aside class="order-summary">
+        <h3>Order Summary</h3>
+        <div id="summaryItems"></div>
+
+        <div class="promo-row">
+          <input id="promoInput" placeholder="Promo code">
+          <button type="button" class="btn btn-outline" id="promoApplyBtn">Apply</button>
+        </div>
+        <div class="promo-message" id="promoMessage"></div>
+
+        <div class="summary-totals">
+          <div class="summary-row"><span>Subtotal</span><span id="sumSubtotal">₱0</span></div>
+          <div class="summary-row" id="discountRow" style="display:none;"><span>Discount</span><span id="sumDiscount">-₱0</span></div>
+          <div class="summary-row"><span>Shipping</span><span id="sumShipping">₱0</span></div>
+          <div class="summary-row summary-total"><span>Total</span><span id="sumTotal">₱0</span></div>
+        </div>
+
+        <button type="submit" form="checkoutForm" class="btn btn-primary" id="continueToPaymentBtn">Continue to Payment — <span id="ctpTotal">₱0</span></button>
+        <div class="checkout-note">Mockup preview — no real payment is processed yet.</div>
+      </aside>
+    </div>
+
+    <div class="empty-checkout" id="emptyCheckout">
+      <p>Your cart is empty.</p>
+      <a href="shop.html" class="btn btn-outline">Continue Shopping</a>
+    </div>
+
+    <div class="order-confirmation" id="orderConfirmation">
+      <h2>Order Placed!</h2>
+      <p>Thank you — your order <strong id="confOrderNumber"></strong> has been received.</p>
+      <p>We'll follow up via email or phone with updates on your shipment.</p>
+      <a href="shop.html" class="btn btn-outline">Continue Shopping</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer id="site-footer">
+  <div class="footer-crest" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#ornateCross"/></svg></div>
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">CARPE<span class="logo-mark"><svg viewBox="0 0 100 100"><use href="#ornateCross"/></svg></span></a>
+        <p>Premium streetwear and lifestyle apparel for those who seize the moment. Designed in-house, made for the culture.</p>
+        <div class="social-row">
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+          <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M14 3v11a3.5 3.5 0 1 1-3-3.46"/><path d="M14 3a5 5 0 0 0 5 5"/></svg></a>
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="shop.html">Shop All</a></li>
+          <li><a href="index.html#new-arrivals">New Arrivals</a></li>
+          <li><a href="index.html#featured-collection">Collections</a></li>
+          <li><a href="#">Product Details</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="shop.html">Cart</a></li>
+          <li><a href="checkout.html">Checkout</a></li>
+          <li><a href="#">Account Dashboard</a></li>
+          <li><a href="#">Track Order</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="index.html#brand-story">About Us</a></li>
+          <li><a href="index.html#site-footer">Contact</a></li>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Rewards Program</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal &amp; Payment</h4>
+        <ul style="margin-bottom:18px;">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms &amp; Conditions</a></li>
+        </ul>
+        <div class="payment-row">
+          <span class="pay-chip">GCash</span>
+          <span class="pay-chip">Maya</span>
+          <span class="pay-chip">Visa</span>
+          <span class="pay-chip">Mastercard</span>
+          <span class="pay-chip">COD</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 CARPE. All rights reserved.</div>
+      <div class="legal-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms &amp; Conditions</a>
+        <a href="#">FAQs</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="data/constants.js"></script>
+<script src="data/supabase-client.js"></script>
+<script src="data/render.js"></script>
+<script src="data/cart.js"></script>
+<script>
+  // sticky header shrink
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  let SHIPPING_FLAT = 150;
+  let FREE_SHIPPING_THRESHOLD = 3000;
+  let PICKUP_ENABLED = true;
+  let PICKUP_NAME = 'CARPE Flagship Store';
+  let PICKUP_ADDRESS = '123 Poblacion Ave, Makati City, Metro Manila';
+  let PICKUP_HOURS = 'Mon–Sat, 11AM–8PM';
+
+  const cart = loadCart();
+  const checkoutLayout = document.getElementById('checkoutLayout');
+  const emptyCheckout = document.getElementById('emptyCheckout');
+  const orderConfirmation = document.getElementById('orderConfirmation');
+
+  let appliedPromo = null;
+  let discount = 0;
+  let deliveryMethod = 'ship';
+
+  init();
+
+  function init() {
+    if (!cart.length) {
+      checkoutLayout.style.display = 'none';
+      emptyCheckout.style.display = 'block';
+      return;
+    }
+    renderSummaryItems();
+    renderTotals();
+    wireDeliveryMethod();
+    wirePromo();
+    wireForm();
+    // Fetch admin-configured shipping settings in the background — the form above
+    // is already fully interactive with defaults, so this network round-trip never
+    // blocks clicking "Store Pickup" right after a page refresh.
+    loadShippingSettings().then(() => applyShippingSettingsToUI());
+  }
+
+  async function loadShippingSettings() {
+    try {
+      const settings = await CarpeDB.fetchShippingSettings();
+      if (!settings) return;
+      SHIPPING_FLAT = Number(settings.flat_rate);
+      FREE_SHIPPING_THRESHOLD = Number(settings.free_shipping_threshold);
+      PICKUP_ENABLED = !!settings.pickup_enabled;
+      PICKUP_NAME = settings.pickup_name || PICKUP_NAME;
+      PICKUP_ADDRESS = settings.pickup_address || PICKUP_ADDRESS;
+      PICKUP_HOURS = settings.pickup_hours || PICKUP_HOURS;
+    } catch (err) {
+      console.error('Failed to load shipping settings, using defaults', err);
+    }
+  }
+
+  function applyShippingSettingsToUI() {
+    const optPickup = document.getElementById('optPickup');
+    const shipOptionPrice = document.getElementById('shipOptionPrice');
+
+    shipOptionPrice.textContent = (FREE_SHIPPING_THRESHOLD > 0 && cartSubtotal(cart) >= FREE_SHIPPING_THRESHOLD) ? 'Free' : formatPeso(SHIPPING_FLAT);
+
+    optPickup.style.display = PICKUP_ENABLED ? '' : 'none';
+    if (PICKUP_ENABLED) {
+      document.getElementById('pickupInfoName').textContent = PICKUP_NAME;
+      document.getElementById('pickupInfoAddress').textContent = PICKUP_ADDRESS;
+      document.getElementById('pickupInfoHours').textContent = PICKUP_HOURS;
+    } else if (deliveryMethod === 'pickup') {
+      // Pickup got disabled server-side after the user already picked it — fall back to shipping.
+      document.getElementById('optShip').querySelector('input').checked = true;
+      document.getElementById('optShip').querySelector('input').dispatchEvent(new Event('change'));
+    }
+
+    renderTotals();
+  }
+
+  function wireDeliveryMethod() {
+    const optShip = document.getElementById('optShip');
+    const optPickup = document.getElementById('optPickup');
+    const shippingAddressSection = document.getElementById('shippingAddressSection');
+    const pickupDetailsSection = document.getElementById('pickupDetailsSection');
+    const pickupInfo = document.getElementById('pickupInfo');
+    const addressFields = shippingAddressSection.querySelectorAll('input[required]');
+    const pickupFields = pickupDetailsSection.querySelectorAll('input');
+    const pickupDateTime = document.getElementById('ckPickupDateTime');
+
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    pickupDateTime.min = now.toISOString().slice(0, 16);
+
+    document.querySelectorAll('input[name="deliveryMethod"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        deliveryMethod = radio.value;
+        optShip.classList.toggle('active', deliveryMethod === 'ship');
+        optPickup.classList.toggle('active', deliveryMethod === 'pickup');
+
+        const isPickup = deliveryMethod === 'pickup';
+        shippingAddressSection.style.display = isPickup ? 'none' : '';
+        pickupDetailsSection.style.display = isPickup ? '' : 'none';
+        pickupInfo.style.display = isPickup ? 'block' : 'none';
+        addressFields.forEach(field => { field.required = !isPickup; });
+        pickupFields.forEach(field => { field.required = isPickup; });
+
+        renderTotals();
+      });
+    });
+  }
+
+  function renderSummaryItems() {
+    const container = document.getElementById('summaryItems');
+    container.innerHTML = '';
+    cart.forEach(item => {
+      const metaParts = [];
+      if (item.size) metaParts.push('Size ' + item.size);
+      metaParts.push('Qty ' + item.qty);
+      const row = document.createElement('div');
+      row.className = 'summary-item';
+      row.innerHTML = `
+        <div class="summary-item-img"><img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.name)}" onerror="handleImgError(this)"></div>
+        <div class="summary-item-info">
+          <div class="summary-item-name">${escapeHtml(item.name)}</div>
+          <div class="summary-item-meta">${escapeHtml(metaParts.join(' · '))}</div>
+        </div>
+        <div class="summary-item-price">${formatPeso(item.price * item.qty)}</div>
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  function computeShipping(subtotal) {
+    if (deliveryMethod === 'pickup') return 0;
+    if (FREE_SHIPPING_THRESHOLD > 0 && subtotal >= FREE_SHIPPING_THRESHOLD) return 0;
+    return SHIPPING_FLAT;
+  }
+
+  function renderTotals() {
+    const subtotal = cartSubtotal(cart);
+    const shipping = computeShipping(subtotal);
+    const total = Math.max(0, subtotal - discount + shipping);
+
+    document.getElementById('sumSubtotal').textContent = formatPeso(subtotal);
+    const discountRow = document.getElementById('discountRow');
+    if (discount > 0) {
+      discountRow.style.display = '';
+      document.getElementById('sumDiscount').textContent = '-' + formatPeso(discount);
+    } else {
+      discountRow.style.display = 'none';
+    }
+    document.getElementById('sumShipping').textContent = deliveryMethod === 'pickup' ? 'Pickup — Free' : (shipping === 0 ? 'Free' : formatPeso(shipping));
+    document.getElementById('sumTotal').textContent = formatPeso(total);
+    document.getElementById('ctpTotal').textContent = formatPeso(total);
+
+    return { subtotal, shipping, total };
+  }
+
+  function wirePromo() {
+    const promoInput = document.getElementById('promoInput');
+    const promoApplyBtn = document.getElementById('promoApplyBtn');
+    const promoMessage = document.getElementById('promoMessage');
+
+    promoApplyBtn.addEventListener('click', async () => {
+      if (appliedPromo) {
+        appliedPromo = null;
+        discount = 0;
+        promoInput.value = '';
+        promoInput.disabled = false;
+        promoApplyBtn.textContent = 'Apply';
+        promoMessage.textContent = '';
+        promoMessage.className = 'promo-message';
+        renderTotals();
+        return;
+      }
+
+      const code = promoInput.value.trim();
+      if (!code) return;
+
+      promoApplyBtn.disabled = true;
+      promoMessage.textContent = 'Checking…';
+      promoMessage.className = 'promo-message';
+
+      try {
+        const promos = await CarpeDB.fetchPromos();
+        const promo = promos.find(p => p.code.toLowerCase() === code.toLowerCase());
+        const { subtotal } = renderTotals();
+
+        let error = '';
+        if (!promo) error = 'Invalid promo code.';
+        else if (!promo.active) error = 'This promo code is no longer active.';
+        else if (promo.expires_at && new Date(promo.expires_at) < new Date()) error = 'This promo code has expired.';
+        else if (promo.min_subtotal && subtotal < promo.min_subtotal) error = `Minimum order of ${formatPeso(promo.min_subtotal)} required.`;
+        else if (promo.max_uses != null && promo.uses >= promo.max_uses) error = 'This promo code has reached its usage limit.';
+
+        if (error) {
+          promoMessage.textContent = error;
+          promoMessage.className = 'promo-message error';
+        } else {
+          const rawDiscount = promo.discount_type === 'percent' ? subtotal * (promo.discount_value / 100) : promo.discount_value;
+          discount = Math.min(rawDiscount, subtotal);
+          appliedPromo = promo;
+          promoInput.disabled = true;
+          promoApplyBtn.textContent = 'Remove';
+          promoMessage.textContent = `Applied: ${promo.code} (-${formatPeso(discount)})`;
+          promoMessage.className = 'promo-message success';
+          renderTotals();
+        }
+      } catch (err) {
+        console.error('Failed to validate promo code', err);
+        promoMessage.textContent = 'Could not validate promo code right now.';
+        promoMessage.className = 'promo-message error';
+      } finally {
+        promoApplyBtn.disabled = false;
+      }
+    });
+  }
+
+  function formatPickupDateTime(value) {
+    if (!value) return 'Not specified';
+    const d = new Date(value);
+    if (isNaN(d)) return 'Not specified';
+    return d.toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  function wireForm() {
+    const form = document.getElementById('checkoutForm');
+    const submitBtn = document.getElementById('continueToPaymentBtn');
+    const errorBanner = document.getElementById('checkoutError');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+
+      const originalHtml = submitBtn.innerHTML;
+      const { total } = renderTotals();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Placing order…';
+      errorBanner.classList.remove('show');
+
+      try {
+        const isPickup = deliveryMethod === 'pickup';
+        const firstName = document.getElementById(isPickup ? 'ckPickupFirstName' : 'ckFirstName').value.trim();
+        const lastName = document.getElementById(isPickup ? 'ckPickupLastName' : 'ckLastName').value.trim();
+        const email = document.getElementById('ckEmail').value.trim();
+        const phone = document.getElementById(isPickup ? 'ckPickupPhone' : 'ckPhone').value.trim();
+
+        const notes = isPickup
+          ? [
+              `Pickup: ${firstName} ${lastName}`,
+              `${PICKUP_NAME} — ${PICKUP_ADDRESS}`,
+              `Estimated pickup: ${formatPickupDateTime(document.getElementById('ckPickupDateTime').value)}`,
+              `Phone: ${phone}`
+            ].join('\n')
+          : [
+              `Ship to: ${firstName} ${lastName}`,
+              (() => {
+                const address1 = document.getElementById('ckAddress1').value.trim();
+                const address2 = document.getElementById('ckAddress2').value.trim();
+                return address2 ? `${address1}, ${address2}` : address1;
+              })(),
+              `${document.getElementById('ckCity').value.trim()}, ${document.getElementById('ckRegion').value.trim()} ${document.getElementById('ckPostal').value.trim()}`,
+              document.getElementById('ckCountry').value,
+              `Phone: ${phone}`
+            ].join('\n');
+
+        const items = cart.map(item => ({
+          product_id: item.id,
+          name: item.name,
+          price: item.price,
+          qty: item.qty,
+          size: item.size || null
+        }));
+
+        const payload = {
+          order_number: 'CARPE-' + Date.now().toString(36).toUpperCase(),
+          customer_name: `${firstName} ${lastName}`.trim(),
+          customer_email: email || null,
+          customer_phone: phone || null,
+          items,
+          total,
+          status: 'paid',
+          notes
+        };
+
+        const created = await CarpeDB.insertOrder(payload);
+
+        if (appliedPromo) {
+          try {
+            await CarpeDB.updatePromo(appliedPromo.id, { uses: (appliedPromo.uses || 0) + 1 });
+          } catch (err) {
+            console.error('Failed to increment promo usage', err);
+          }
+        }
+
+        saveCart([]);
+        showConfirmation(created.order_number);
+      } catch (err) {
+        console.error('Failed to place order', err);
+        errorBanner.textContent = 'Something went wrong placing your order. Please try again.' + (err && err.message ? ' (' + err.message + ')' : '');
+        errorBanner.classList.add('show');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHtml;
+      }
+    });
+  }
+
+  function showConfirmation(orderNumber) {
+    checkoutLayout.style.display = 'none';
+    document.getElementById('confOrderNumber').textContent = orderNumber;
+    orderConfirmation.style.display = 'block';
+  }
+</script>
+</body>
+</html>

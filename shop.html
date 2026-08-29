@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop All — CARPE</title>
+<meta name="description" content="Shop the full CARPE catalog — hoodies, jackets, pants, shirts and accessories.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#0a0a0a;
+    --near-black:#141414;
+    --white:#ffffff;
+    --off-white:#111009;
+    --gray-100:rgba(255,255,255,.07);
+    --gray-300:#bdbdbb;
+    --gray-500:#8a8a88;
+    --gray-700:#b8b5ac;
+    --accent:#c81e2c;
+    --accent-dark:#8f0f1b;
+    --metal:#b7a582;
+    --metal-dim:rgba(183,165,130,.35);
+    --metal-line:linear-gradient(90deg, transparent, var(--metal), transparent);
+    --accent-grad:linear-gradient(135deg, #d92438 0%, #8f0f1b 100%);
+    --shadow-soft:0 20px 40px -20px rgba(0,0,0,.35);
+    --shadow-lift:0 30px 60px -20px rgba(0,0,0,.5);
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body.modal-open{overflow:hidden;}
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  img{display:block;width:100%;height:100%;object-fit:cover;}
+  .container{max-width:1320px;margin:0 auto;padding:0 24px;}
+  .section-label{
+    font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);
+    font-weight:700;margin-bottom:14px;display:inline-flex;align-items:center;gap:8px;
+  }
+  .section-label::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--metal);flex:none;}
+  .section-title{
+    font-family:var(--font-display);
+    font-size:clamp(28px,4vw,46px);
+    font-weight:340;letter-spacing:-.015em;line-height:1.05;color:var(--white);
+  }
+  .btn{
+    position:relative;overflow:hidden;
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    padding:14px 28px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
+    border:1px solid var(--black);cursor:pointer;transition:all .4s var(--ease);white-space:nowrap;
+    border-radius:8px;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-outline{background:transparent;color:var(--white);border-color:rgba(255,255,255,.7);}
+  .btn-outline:hover{background:var(--white);color:var(--black);border-color:var(--white);box-shadow:0 14px 30px -10px rgba(0,0,0,.5);}
+  .link-underline{position:relative;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;transition:color .3s var(--ease);}
+  .link-underline::after{
+    content:'';position:absolute;left:0;bottom:-4px;width:100%;height:1px;background:currentColor;
+    transform:scaleX(0);transform-origin:right;transition:transform .4s var(--ease);
+  }
+  .link-underline:hover{color:var(--accent);}
+  .link-underline:hover::after{transform:scaleX(1);transform-origin:left;}
+
+  /* fade-in on scroll */
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s var(--ease), transform .8s var(--ease);}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
+  /* film grain overlay */
+  .grain-overlay{
+    position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ===== NAV ===== */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 32px;transition:all .4s var(--ease);
+    background:rgba(10,10,10,.92);backdrop-filter:blur(10px);color:var(--white);
+    box-shadow:0 1px 0 rgba(183,165,130,.25);
+  }
+  header.scrolled{padding:14px 32px;}
+  .logo{font-family:var(--font-display);font-size:25px;letter-spacing:.14em;font-weight:500;display:inline-flex;align-items:center;}
+  .logo-mark{color:var(--metal);display:inline-flex;margin-left:6px;}
+  .logo-mark svg{width:15px;height:15px;}
+  nav.main-nav{display:flex;gap:36px;}
+  nav.main-nav a{position:relative;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;transition:color .3s var(--ease);}
+  nav.main-nav a::after{
+    content:'';position:absolute;left:0;bottom:-6px;width:100%;height:1px;background:var(--metal);
+    transform:scaleX(0);transform-origin:right;transition:transform .35s var(--ease);
+  }
+  nav.main-nav a:hover,nav.main-nav a.active{color:var(--metal);}
+  nav.main-nav a:hover::after,nav.main-nav a.active::after{transform:scaleX(1);transform-origin:left;}
+  .nav-actions{display:flex;align-items:center;gap:22px;}
+  .icon-btn{background:none;border:none;color:var(--white);cursor:pointer;position:relative;padding:4px;transition:color .3s var(--ease);}
+  .icon-btn:hover{color:var(--metal);}
+  .icon-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6;}
+  .cart-count{
+    position:absolute;top:-6px;right:-8px;background:var(--accent);color:#fff;font-size:9px;
+    width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;
+  }
+  @keyframes cartBump{0%{transform:scale(1);}40%{transform:scale(1.25);}100%{transform:scale(1);}}
+  .icon-btn.bump{animation:cartBump .4s var(--ease);}
+  .hamburger{display:none;background:none;border:none;color:var(--white);cursor:pointer;}
+  .mobile-menu{
+    position:fixed;inset:0;background:var(--black);z-index:1100;display:flex;flex-direction:column;
+    justify-content:center;align-items:center;gap:28px;transform:translateY(-100%);
+    transition:transform .5s var(--ease);
+  }
+  .mobile-menu.open{transform:translateY(0);}
+  .mobile-menu a{font-family:var(--font-display);font-size:28px;color:#fff;}
+  .mobile-menu .close-btn{position:absolute;top:26px;right:28px;background:none;border:none;color:#fff;font-size:26px;cursor:pointer;}
+
+  section{padding:72px 0;}
+  .bg-black{
+    background:
+      radial-gradient(ellipse 60% 50% at 12% 0%, rgba(200,30,44,.10), transparent 60%),
+      radial-gradient(ellipse 50% 45% at 100% 100%, rgba(183,165,130,.06), transparent 65%),
+      linear-gradient(165deg,#141414 0%,#050505 65%,#000 100%);
+    color:var(--white);
+  }
+
+  /* ===== PAGE BANNER ===== */
+  .page-banner{
+    padding:100px 0 40px;text-align:center;
+    background:radial-gradient(ellipse 60% 60% at 50% 0%, rgba(183,165,130,.09), transparent 65%), var(--black);
+    border-bottom:1px solid var(--metal-dim);
+  }
+  .breadcrumb{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-500);margin-bottom:18px;}
+  .breadcrumb a:hover{color:var(--metal);}
+  .breadcrumb .sep{margin:0 8px;color:var(--metal-dim);}
+  .page-banner h1{font-family:var(--font-display);font-size:clamp(38px,6vw,64px);font-weight:340;color:#fff;}
+  .page-banner p{color:var(--gray-300);max-width:520px;margin:18px auto 0;font-size:15px;line-height:1.7;}
+
+  /* ===== FILTER TABS ===== */
+  .filter-bar{
+    display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:32px 0 8px;
+  }
+  .filter-tab{
+    background:none;border:1px solid rgba(255,255,255,.18);color:var(--gray-300);
+    padding:10px 22px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+    cursor:pointer;transition:all .3s var(--ease);
+  }
+  .filter-tab:hover{border-color:var(--metal);color:#fff;}
+  .filter-tab.active{background:var(--accent-grad);border-color:transparent;color:#fff;box-shadow:0 10px 24px -10px rgba(200,30,44,.55);}
+  .result-count{text-align:center;font-size:12px;color:var(--gray-500);letter-spacing:.08em;padding-bottom:34px;}
+
+  /* ===== PRODUCT GRID ===== */
+  .product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;}
+  .product-card{transition:transform .5s var(--ease), opacity .4s var(--ease);}
+  .product-card:hover{transform:translateY(-6px);}
+  .product-card.hidden{display:none;}
+  .product-card .ph{aspect-ratio:3/4;position:relative;overflow:hidden;transition:box-shadow .5s var(--ease);background:#111;cursor:pointer;}
+  .product-card .ph img{transition:transform .6s var(--ease);}
+  .product-card:hover .ph{box-shadow:var(--shadow-lift), 0 0 0 1px var(--metal-dim);}
+  .product-card:hover .ph img{transform:scale(1.06);}
+  .badge{
+    position:absolute;top:14px;left:14px;background:var(--accent-grad);color:#fff;font-size:10px;
+    letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:5px 10px;z-index:2;
+    box-shadow:0 6px 16px -6px rgba(200,30,44,.6);
+  }
+  .quick-view-btn{
+    position:absolute;left:0;right:0;bottom:0;background:rgba(10,10,10,.92);color:#fff;
+    text-align:center;padding:12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+    transform:translateY(100%);transition:transform .35s var(--ease), color .3s var(--ease);z-index:2;
+    border-top:1px solid var(--metal-dim);cursor:pointer;
+  }
+  .quick-view-btn:hover{color:var(--metal);}
+  .product-card:hover .quick-view-btn{transform:translateY(0);}
+  @media (hover:none){
+    /* touch devices (phone/iPad) have no hover state to reveal this — keep it visible always */
+    .quick-view-btn{transform:translateY(0);}
+  }
+  .product-info{padding-top:16px;}
+  .product-info .p-cat{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-500);margin-bottom:6px;}
+  .product-info .p-name{font-size:14px;font-weight:600;margin-bottom:6px;cursor:pointer;transition:color .25s var(--ease);}
+  .product-info .p-name:hover{color:var(--metal);}
+  .product-info .p-price{font-size:14px;color:var(--gray-700);}
+  .swatches{display:flex;gap:6px;margin-top:10px;}
+  .swatch{width:14px;height:14px;border-radius:50%;border:1px solid var(--gray-300);cursor:pointer;transition:transform .25s var(--ease), box-shadow .25s var(--ease);}
+  .swatch:hover{transform:scale(1.2);box-shadow:0 0 0 2px var(--metal-dim);}
+  .swatch.selected{transform:scale(1.15);box-shadow:0 0 0 2px var(--white), 0 0 0 4px var(--metal);}
+  .empty-state{text-align:center;padding:60px 0;color:var(--gray-500);font-size:14px;display:none;}
+  .empty-state.show{display:block;}
+
+  /* ===== QUICK VIEW MODAL ===== */
+  .quick-view-overlay{
+    position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;padding:24px;
+    opacity:0;pointer-events:none;transition:opacity .35s var(--ease);
+  }
+  .quick-view-overlay.open{opacity:1;pointer-events:auto;}
+  .quick-view-modal{
+    background:linear-gradient(160deg,#151412,#0a0a09);border:1px solid var(--metal-dim);
+    max-width:940px;width:100%;max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch;
+    display:grid;grid-template-columns:1fr 1fr;position:relative;
+    box-shadow:var(--shadow-lift);transform:translateY(24px) scale(.98);
+    transition:transform .4s var(--ease);
+  }
+  .quick-view-overlay.open .quick-view-modal{transform:translateY(0) scale(1);}
+  .qv-close{
+    position:absolute;top:16px;right:16px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);
+    color:#fff;width:36px;height:36px;font-size:20px;line-height:1;cursor:pointer;z-index:3;
+    display:flex;align-items:center;justify-content:center;transition:.25s var(--ease);
+  }
+  .qv-close:hover{background:var(--accent);border-color:var(--accent);}
+  .qv-image{position:relative;aspect-ratio:3/4;overflow:hidden;background:#111;}
+  .qv-image .badge{top:16px;left:16px;}
+  .qv-thumbs{position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;padding:14px;overflow-x:auto;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent);}
+  .qv-thumbs:empty,.qv-thumbs.single{display:none;}
+  .qv-thumb{width:52px;height:52px;flex:none;border-radius:4px;overflow:hidden;cursor:pointer;border:2px solid transparent;opacity:.6;transition:.25s var(--ease);}
+  .qv-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .qv-thumb.active{border-color:var(--metal);opacity:1;}
+  .qv-thumb:hover{opacity:1;}
+  .qv-details{padding:40px 36px;display:flex;flex-direction:column;}
+  .qv-cat{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--metal);margin-bottom:12px;font-weight:700;}
+  .qv-name{font-family:var(--font-display);font-size:clamp(22px,3vw,30px);font-weight:400;margin-bottom:14px;line-height:1.15;}
+  .qv-price{font-size:18px;color:var(--gray-700);margin-bottom:22px;}
+  .qv-desc{font-size:14px;line-height:1.75;color:var(--gray-500);margin-bottom:28px;}
+  .qv-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-500);margin-bottom:10px;font-weight:700;}
+  .qv-swatches{display:flex;gap:8px;margin-bottom:26px;}
+  .qv-swatches .swatch{width:18px;height:18px;}
+  .qv-sizes{display:flex;gap:8px;margin-bottom:26px;flex-wrap:wrap;}
+  .qv-size{border:1px solid rgba(255,255,255,.25);padding:9px 15px;font-size:12px;letter-spacing:.05em;background:none;color:#fff;cursor:pointer;transition:.25s var(--ease);}
+  .qv-size:hover{border-color:var(--metal);}
+  .qv-size.selected{background:var(--accent-grad);border-color:transparent;}
+  .qv-qty{display:flex;align-items:center;gap:16px;margin-bottom:30px;}
+  .qv-qty button{width:32px;height:32px;border:1px solid rgba(255,255,255,.25);background:none;color:#fff;cursor:pointer;font-size:16px;transition:.25s var(--ease);}
+  .qv-qty button:hover{border-color:var(--metal);color:var(--metal);}
+  .qv-qty span{min-width:20px;text-align:center;font-size:14px;}
+  .qv-actions{display:flex;gap:14px;margin-top:auto;flex-wrap:wrap;}
+  .qv-actions .btn{flex:1;min-width:180px;}
+  .qv-note{font-size:11px;color:var(--gray-500);margin-top:16px;}
+
+  /* ===== CART DRAWER ===== */
+  .cart-drawer-overlay{
+    position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.7);
+    opacity:0;pointer-events:none;transition:opacity .35s var(--ease);
+  }
+  .cart-drawer-overlay.open{opacity:1;pointer-events:auto;}
+  .cart-drawer{
+    position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100%;background:#0e0e0d;
+    border-left:1px solid var(--metal-dim);display:flex;flex-direction:column;
+    transform:translateX(100%);transition:transform .4s var(--ease);box-shadow:var(--shadow-lift);
+  }
+  .cart-drawer-overlay.open .cart-drawer{transform:translateX(0);}
+  .cart-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:26px 28px;border-bottom:1px solid rgba(255,255,255,.1);}
+  .cart-drawer-head h3{font-family:var(--font-display);font-size:22px;font-weight:400;color:#fff;display:flex;align-items:center;gap:10px;}
+  .cart-count-pill{font-family:var(--font-body);font-size:11px;font-weight:700;letter-spacing:.02em;color:var(--black);background:var(--metal);border-radius:20px;padding:2px 9px;}
+  .cart-drawer-close{background:none;border:1px solid rgba(255,255,255,.16);border-radius:50%;width:32px;height:32px;color:#fff;font-size:18px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;transition:.25s var(--ease);flex:none;}
+  .cart-drawer-close:hover{color:var(--black);background:var(--metal);border-color:var(--metal);}
+  .cart-drawer-items{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 24px;}
+  .cart-item{
+    display:flex;gap:14px;padding:16px;margin-bottom:12px;
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;
+    transition:border-color .25s var(--ease);
+  }
+  .cart-item:hover{border-color:var(--metal-dim);}
+  .cart-item-img{width:68px;height:86px;flex:none;overflow:hidden;border-radius:5px;background:#111;}
+  .cart-item-info{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .cart-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .cart-item-name{font-size:13px;font-weight:600;color:#fff;line-height:1.35;}
+  .cart-item-meta{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--gray-500);margin:5px 0 12px;}
+  .cart-item-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;}
+  .qty-stepper{display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.16);border-radius:4px;overflow:hidden;flex:none;}
+  .qty-btn{background:transparent;border:none;color:var(--gray-300);width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s var(--ease);}
+  .qty-btn svg{width:9px;height:9px;stroke:currentColor;stroke-width:2.4;fill:none;}
+  .qty-btn:hover{background:var(--metal);color:var(--black);}
+  .qty-value{min-width:22px;text-align:center;font-size:12px;color:#fff;}
+  .cart-item-price{font-size:13px;font-weight:700;color:var(--metal);white-space:nowrap;}
+  .cart-item-remove{background:none;border:none;color:var(--gray-500);font-size:16px;cursor:pointer;flex:none;line-height:1;padding:2px;transition:color .2s var(--ease);}
+  .cart-item-remove:hover{color:var(--accent);}
+  .cart-drawer-empty{display:none;text-align:center;color:var(--gray-500);font-size:13px;padding:60px 24px;}
+  .cart-drawer-empty.show{display:block;}
+  .cart-drawer-footer{padding:22px 24px calc(24px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.1);}
+  .cart-drawer-subtotal{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;}
+  .cart-drawer-subtotal>span:first-child{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-500);}
+  .cart-drawer-subtotal>span:last-child{font-family:var(--font-display);font-size:20px;color:#fff;}
+  .btn-arrow{display:inline-block;margin-left:8px;transition:transform .35s var(--ease);}
+  .btn:hover .btn-arrow{transform:translateX(4px);}
+
+  /* ===== FOOTER ===== */
+  footer{position:relative;background:linear-gradient(180deg,#0c0c0c 0%,#000 100%);color:var(--gray-300);padding:56px 0 0;}
+  footer::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--metal-line);}
+  .footer-crest{
+    position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:32px;height:32px;
+    background:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    color:var(--metal);box-shadow:0 0 0 1px var(--metal-dim),0 8px 20px -6px rgba(0,0,0,.6);z-index:2;
+  }
+  .footer-crest svg{width:16px;height:16px;}
+  .footer-top{display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:32px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.1);}
+  .footer-brand .logo{margin-bottom:16px;}
+  .footer-brand p{font-size:13px;line-height:1.7;color:var(--gray-500);max-width:280px;}
+  .social-row{display:flex;gap:14px;margin-top:22px;}
+  .social-row a{width:36px;height:36px;border:1px solid rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.3s var(--ease);}
+  .social-row a:hover{background:var(--accent);border-color:var(--accent);}
+  .social-row svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.6;}
+  .footer-col h4{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#fff;margin-bottom:20px;font-weight:700;}
+  .footer-col li{margin-bottom:12px;}
+  .footer-col a{font-size:13px;color:var(--gray-300);transition:.25s var(--ease);}
+  .footer-col a:hover{color:var(--accent);}
+  .payment-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .pay-chip{
+    border:1px solid rgba(255,255,255,.2);padding:6px 12px;font-size:10px;letter-spacing:.06em;
+    text-transform:uppercase;border-radius:3px;color:var(--gray-300);
+  }
+  .footer-bottom{
+    display:flex;justify-content:space-between;align-items:center;padding:20px 0;font-size:12px;color:var(--gray-500);
+    flex-wrap:wrap;gap:12px;
+  }
+  .footer-bottom .legal-links{display:flex;gap:22px;}
+
+  /* ===== responsive ===== */
+  @media (max-width:1024px){
+    nav.main-nav{display:none;}
+    .hamburger{display:block;}
+    header{padding:18px 24px;}
+    header.scrolled{padding:12px 24px;}
+    .container{padding:0 20px;}
+    section{padding:60px 0;}
+    .page-banner{padding:90px 0 36px;}
+    .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;}
+    .footer-top{grid-template-columns:1fr 1fr;gap:36px;}
+    .quick-view-modal{grid-template-columns:1fr;max-height:92vh;}
+    .qv-image{aspect-ratio:16/10;}
+    .qv-details{padding:36px 28px;}
+  }
+  @media (max-width:768px){
+    .footer-top{grid-template-columns:1fr;gap:36px;}
+  }
+  @media (max-width:600px){
+    section{padding:44px 0;}
+    header{padding:14px 16px;}
+    .logo{font-size:21px;}
+    .nav-actions{gap:12px;}
+    .icon-btn svg{width:17px;height:17px;}
+    .page-banner{padding:90px 0 32px;}
+    .filter-bar{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-left:4px;padding-right:4px;}
+    .filter-bar::-webkit-scrollbar{display:none;}
+    .filter-tab{padding:9px 16px;font-size:10px;flex:none;}
+    .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+    .product-info .p-name{font-size:13px;}
+    .footer-top{grid-template-columns:1fr;gap:36px;}
+    .footer-bottom{flex-direction:column;align-items:flex-start;gap:14px;}
+    .qv-details{padding:28px 22px;}
+    .quick-view-overlay{padding:0;}
+    .quick-view-modal{max-height:100vh;height:100%;}
+    .cart-drawer{width:100%;}
+    .cart-drawer-head{padding:18px 18px;}
+    .cart-drawer-head h3{font-size:19px;}
+    .cart-drawer-items{padding:14px;}
+    .cart-item{padding:12px;gap:10px;margin-bottom:10px;}
+    .cart-item-img{width:56px;height:70px;}
+    .cart-item-name{font-size:12px;}
+    .cart-drawer-footer{padding:16px 18px calc(18px + env(safe-area-inset-bottom));}
+  }
+  @media (max-height:700px){
+    /* short/landscape screens (phones rotated, small laptops): keep the image from
+       pushing sizes/qty/Add to Cart out of view before the modal starts scrolling */
+    .qv-image{aspect-ratio:16/7;}
+    .qv-details{padding:26px 28px;}
+    .qv-desc{margin-bottom:16px;}
+    .qv-swatches,.qv-sizes{margin-bottom:16px;}
+    .qv-qty{margin-bottom:18px;}
+  }
+  @media (max-height:480px){
+    .qv-image{aspect-ratio:16/4;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Reusable brand mark -->
+<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <symbol id="ornateCross" viewBox="0 0 100 100">
+    <g fill="currentColor">
+      <rect x="42" y="4" width="16" height="92" rx="3"/>
+      <rect x="4" y="42" width="92" height="16" rx="3"/>
+      <circle cx="50" cy="10" r="9"/>
+      <circle cx="39" cy="15" r="6"/>
+      <circle cx="61" cy="15" r="6"/>
+      <circle cx="50" cy="90" r="9"/>
+      <circle cx="39" cy="85" r="6"/>
+      <circle cx="61" cy="85" r="6"/>
+      <circle cx="10" cy="50" r="9"/>
+      <circle cx="15" cy="39" r="6"/>
+      <circle cx="15" cy="61" r="6"/>
+      <circle cx="90" cy="50" r="9"/>
+      <circle cx="85" cy="39" r="6"/>
+      <circle cx="85" cy="61" r="6"/>
+      <rect x="44" y="44" width="12" height="12" transform="rotate(45 50 50)"/>
+    </g>
+  </symbol>
+</svg>
+<div class="grain-overlay" aria-hidden="true"></div>
+
+<!-- ============ HEADER / NAV ============ -->
+<header id="siteHeader">
+  <a href="index.html" class="logo">CARPE<span class="logo-mark"><svg viewBox="0 0 100 100"><use href="#ornateCross"/></svg></span></a>
+  <nav class="main-nav">
+    <a href="shop.html" class="link-underline active">Shop</a>
+    <a href="index.html#new-arrivals" class="link-underline">New Arrivals</a>
+    <a href="index.html#featured-collection" class="link-underline">Collections</a>
+    <a href="index.html#brand-story" class="link-underline">About</a>
+    <a href="index.html#site-footer" class="link-underline">Contact</a>
+  </nav>
+  <div class="nav-actions">
+    <button class="icon-btn" title="Search" aria-label="Search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <button class="icon-btn" id="cartBtn" title="Cart" aria-label="Cart">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-btn" id="closeMenuBtn">&times;</button>
+  <a href="shop.html">Shop</a>
+  <a href="index.html#new-arrivals">New Arrivals</a>
+  <a href="index.html#featured-collection">Collections</a>
+  <a href="index.html#brand-story">About</a>
+  <a href="index.html#site-footer">Contact</a>
+</div>
+
+<!-- ============ PAGE BANNER ============ -->
+<section class="page-banner">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span>Shop</div>
+    <h1>Shop All</h1>
+    <p>The full CARPE catalog — hoodies, jackets, pants, shirts and accessories, all in one place. Click any item for a closer look.</p>
+  </div>
+</section>
+
+<!-- ============ SHOP GRID ============ -->
+<section class="bg-black">
+  <div class="container">
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-tab active" data-filter="all">All</button>
+    </div>
+    <div class="result-count" id="resultCount"></div>
+
+    <div class="product-grid reveal" id="productGrid"></div>
+
+    <div class="empty-state" id="emptyState">No products found in this category yet.</div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer id="site-footer">
+  <div class="footer-crest" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#ornateCross"/></svg></div>
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">CARPE<span class="logo-mark"><svg viewBox="0 0 100 100"><use href="#ornateCross"/></svg></span></a>
+        <p>Premium streetwear and lifestyle apparel for those who seize the moment. Designed in-house, made for the culture.</p>
+        <div class="social-row">
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+          <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M14 3v11a3.5 3.5 0 1 1-3-3.46"/><path d="M14 3a5 5 0 0 0 5 5"/></svg></a>
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="shop.html">Shop All</a></li>
+          <li><a href="index.html#new-arrivals">New Arrivals</a></li>
+          <li><a href="index.html#featured-collection">Collections</a></li>
+          <li><a href="#">Product Details</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="#">Cart</a></li>
+          <li><a href="#">Checkout</a></li>
+          <li><a href="#">Account Dashboard</a></li>
+          <li><a href="#">Track Order</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="index.html#brand-story">About Us</a></li>
+          <li><a href="index.html#site-footer">Contact</a></li>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Rewards Program</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal &amp; Payment</h4>
+        <ul style="margin-bottom:18px;">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms &amp; Conditions</a></li>
+        </ul>
+        <div class="payment-row">
+          <span class="pay-chip">GCash</span>
+          <span class="pay-chip">Maya</span>
+          <span class="pay-chip">Visa</span>
+          <span class="pay-chip">Mastercard</span>
+          <span class="pay-chip">COD</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 CARPE. All rights reserved.</div>
+      <div class="legal-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms &amp; Conditions</a>
+        <a href="#">FAQs</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ QUICK VIEW MODAL ============ -->
+<div class="quick-view-overlay" id="qvOverlay">
+  <div class="quick-view-modal" role="dialog" aria-modal="true" aria-label="Product quick view">
+    <button class="qv-close" id="qvClose" aria-label="Close">&times;</button>
+    <div class="qv-image">
+      <span class="badge" id="qvBadge" style="display:none;"></span>
+      <img id="qvImage" src="" alt="" onerror="handleImgError(this)">
+      <div class="qv-thumbs" id="qvThumbs"></div>
+    </div>
+    <div class="qv-details">
+      <div class="qv-cat" id="qvCat"></div>
+      <h3 class="qv-name" id="qvName"></h3>
+      <div class="qv-price" id="qvPrice"></div>
+      <p class="qv-desc" id="qvDesc"></p>
+      <div class="qv-label">Color</div>
+      <div class="qv-swatches" id="qvSwatches"></div>
+      <div class="qv-label">Size</div>
+      <div class="qv-sizes" id="qvSizes"></div>
+      <div class="qv-label">Quantity</div>
+      <div class="qv-qty">
+        <button id="qvMinus" type="button" aria-label="Decrease quantity">&minus;</button>
+        <span id="qvQtyVal">1</span>
+        <button id="qvPlus" type="button" aria-label="Increase quantity">+</button>
+      </div>
+      <div class="qv-actions">
+        <button class="btn btn-outline" id="qvAddToCart" type="button">Add to Cart</button>
+        <a class="btn btn-outline" href="https://m.me/joshAngeloo" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Message Us
+        </a>
+      </div>
+      <div class="qv-note">Mockup preview — checkout is not connected.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cart-drawer-overlay" id="cartDrawerOverlay">
+  <div class="cart-drawer" role="dialog" aria-modal="true" aria-label="Shopping cart">
+    <div class="cart-drawer-head">
+      <h3>Your Cart <span class="cart-count-pill" id="cartDrawerCountPill">0</span></h3>
+      <button class="cart-drawer-close" id="cartDrawerClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="cart-drawer-items" id="cartDrawerItems"></div>
+    <div class="cart-drawer-empty" id="cartDrawerEmpty">Your cart is empty.</div>
+    <div class="cart-drawer-footer">
+      <div class="cart-drawer-subtotal"><span>Subtotal</span><span id="cartDrawerSubtotal">₱0</span></div>
+      <button class="btn btn-outline" id="cartDrawerCheckout" style="width:100%;">Checkout <span class="btn-arrow">&rarr;</span></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="data/constants.js"></script>
+<script src="data/supabase-client.js"></script>
+<script src="data/render.js"></script>
+<script src="data/cart.js"></script>
+<script>
+  // sticky header shrink
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // mobile menu
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const closeMenuBtn = document.getElementById('closeMenuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburgerBtn.addEventListener('click', () => mobileMenu.classList.add('open'));
+  closeMenuBtn.addEventListener('click', () => mobileMenu.classList.remove('open'));
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+  // scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // category filter — tabs generated from CARPE_CATEGORIES; "All" stays the static first button
+  const filterBar = document.getElementById('filterBar');
+  const resultCount = document.getElementById('resultCount');
+  const emptyState = document.getElementById('emptyState');
+
+  function buildCategoryTabs() {
+    CARPE_CATEGORIES.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-tab';
+      btn.dataset.filter = cat.slug;
+      btn.textContent = cat.label;
+      filterBar.appendChild(btn);
+    });
+  }
+
+  function applyFilter(filter){
+    const productCards = document.querySelectorAll('#productGrid .product-card');
+    let visible = 0;
+    productCards.forEach(card => {
+      const match = filter === 'all' || card.dataset.category === filter;
+      card.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    resultCount.textContent = visible + (visible === 1 ? ' item' : ' items');
+    emptyState.classList.toggle('show', visible === 0);
+  }
+
+  filterBar.addEventListener('click', (e) => {
+    const tab = e.target.closest('.filter-tab');
+    if (!tab) return;
+    filterBar.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    applyFilter(tab.dataset.filter);
+  });
+
+  const requestedCategory = new URLSearchParams(window.location.search).get('category');
+
+  // ===== Quick View modal =====
+  const qvOverlay = document.getElementById('qvOverlay');
+  const qvImage = document.getElementById('qvImage');
+  const qvBadge = document.getElementById('qvBadge');
+  const qvCat = document.getElementById('qvCat');
+  const qvName = document.getElementById('qvName');
+  const qvPrice = document.getElementById('qvPrice');
+  const qvDesc = document.getElementById('qvDesc');
+  const qvSwatches = document.getElementById('qvSwatches');
+  const qvSizes = document.getElementById('qvSizes');
+  const qvQtyVal = document.getElementById('qvQtyVal');
+  const qvClose = document.getElementById('qvClose');
+  const qvThumbs = document.getElementById('qvThumbs');
+
+  let qvCartImg = '';
+  let qvProductId = '';
+  let qvSelectedColor = '';
+
+  function renderQvThumbs(images, activeSrc) {
+    qvThumbs.classList.toggle('single', images.length < 2);
+    qvThumbs.innerHTML = images.map(src => `
+      <div class="qv-thumb${src === activeSrc ? ' active' : ''}" data-src="${escapeHtml(src)}"><img src="${escapeHtml(src)}" alt="" onerror="handleImgError(this)"></div>
+    `).join('');
+    qvThumbs.querySelectorAll('.qv-thumb').forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        qvImage.src = thumb.dataset.src;
+        qvThumbs.querySelectorAll('.qv-thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+      });
+    });
+  }
+
+  function openQuickView(card){
+    const img = card.querySelector('.ph img');
+    const badge = card.querySelector('.badge');
+    const cat = card.querySelector('.p-cat').textContent;
+    const name = card.querySelector('.p-name').textContent;
+    const price = card.querySelector('.p-price').textContent;
+    const swatchColors = [...card.querySelectorAll('.swatch')].map(s => s.style.background);
+    const sizes = (card.dataset.sizes || 'One Size').split(',');
+    let images = [];
+    try { images = JSON.parse(card.dataset.images || '[]'); } catch (e) { images = []; }
+    if (!images.length) images = [img.src];
+    renderQvThumbs(images, img.src);
+
+    qvProductId = card.dataset.id;
+    qvCartImg = card.dataset.img || img.src;
+    qvSelectedColor = swatchColors[0] || '';
+    qvImage.src = img.src;
+    qvImage.alt = img.alt;
+    if (badge){ qvBadge.textContent = badge.textContent; qvBadge.style.display = ''; }
+    else { qvBadge.style.display = 'none'; }
+    qvCat.textContent = cat;
+    qvName.textContent = name;
+    qvPrice.textContent = price;
+    qvDesc.textContent = card.dataset.desc || '';
+
+    qvSwatches.innerHTML = '';
+    swatchColors.forEach((c, i) => {
+      const s = document.createElement('span');
+      s.className = 'swatch' + (i === 0 ? ' selected' : '');
+      s.style.background = c;
+      s.addEventListener('click', () => {
+        qvSwatches.querySelectorAll('.swatch').forEach(el => el.classList.remove('selected'));
+        s.classList.add('selected');
+        qvSelectedColor = c;
+      });
+      qvSwatches.appendChild(s);
+    });
+
+    qvSizes.innerHTML = '';
+    sizes.forEach((sz, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'qv-size' + (i === 0 ? ' selected' : '');
+      b.textContent = sz.trim();
+      b.addEventListener('click', () => {
+        qvSizes.querySelectorAll('.qv-size').forEach(el => el.classList.remove('selected'));
+        b.classList.add('selected');
+      });
+      qvSizes.appendChild(b);
+    });
+
+    qvQtyVal.textContent = '1';
+    qvOverlay.classList.add('open');
+    document.body.classList.add('modal-open');
+  }
+
+  function closeQuickView(){
+    qvOverlay.classList.remove('open');
+    document.body.classList.remove('modal-open');
+  }
+
+  document.getElementById('productGrid').addEventListener('click', (e) => {
+    const quickViewBtn = e.target.closest('.quick-view-btn');
+    if (quickViewBtn){
+      const card = quickViewBtn.closest('.product-card');
+      if (card) openQuickView(card);
+      return;
+    }
+    if (e.target.closest('.swatch')) return;
+    const target = e.target.closest('.p-name') || e.target.closest('.ph img');
+    if (!target) return;
+    const card = target.closest('.product-card');
+    if (card) window.location.href = withCart('product.html?id=' + encodeURIComponent(card.dataset.id));
+  });
+
+  qvClose.addEventListener('click', closeQuickView);
+  qvOverlay.addEventListener('click', (e) => { if (e.target === qvOverlay) closeQuickView(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeQuickView(); });
+
+  document.getElementById('qvMinus').addEventListener('click', () => {
+    qvQtyVal.textContent = String(Math.max(1, Number(qvQtyVal.textContent) - 1));
+  });
+  document.getElementById('qvPlus').addEventListener('click', () => {
+    qvQtyVal.textContent = String(Number(qvQtyVal.textContent) + 1);
+  });
+  document.getElementById('qvAddToCart').addEventListener('click', () => {
+    const size = qvSizes.querySelector('.qv-size.selected');
+    addToCart({
+      id: qvProductId,
+      name: qvName.textContent,
+      price: parsePrice(qvPrice.textContent),
+      img: qvCartImg || qvImage.src,
+      qty: Number(qvQtyVal.textContent),
+      size: size ? size.textContent : '',
+      color: qvSelectedColor
+    });
+    closeQuickView();
+  });
+
+  async function initShop(){
+    await syncCategoriesFromDB();
+    buildCategoryTabs();
+    try {
+      const products = await CarpeDB.fetchProducts();
+      const grid = document.getElementById('productGrid');
+      mountGrid(grid, products, renderProductCard);
+      // Guarantees the catalog is visible even if IntersectionObserver never fires for
+      // it (e.g. the grid had ~0 height pre-fetch, or the user scrolled past already).
+      grid.classList.add('in');
+    } catch (err) {
+      console.error('Failed to load products from Supabase', err);
+      emptyState.textContent = "Couldn't load products right now — please refresh.";
+    }
+    const requestedTab = requestedCategory && [...filterBar.querySelectorAll('.filter-tab')].find(t => t.dataset.filter === requestedCategory);
+    if (requestedTab) {
+      filterBar.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      requestedTab.classList.add('active');
+      applyFilter(requestedCategory);
+    } else {
+      applyFilter('all');
+    }
+  }
+  initShop();
+</script>
+</body>
+</html>
